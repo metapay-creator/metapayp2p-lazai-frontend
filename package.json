@@ -1,0 +1,58 @@
+{
+<<<<<<< HEAD
+  "name": "metapayp2p-dapp",
+  "private": true,
+  "version": "1.0.0",
+  "description": "A circulating basic income simulation with blockchain distribution, AI behavior monitoring, and real-time peer transfers.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+=======
+  "name": "metapay-p2p",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+>>>>>>> a615ae49d0101f71a116b2418611a9f81b4a7813
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "ethers": "^6.11.0",
+    "express": "^5.1.0",
+    "openai": "^5.9.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.1",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "eslint": "^9.30.1",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "vite": "^7.0.4"
+  },
+<<<<<<< HEAD
+=======
+  "description": "> A circulating basic income simulation with blockchain distribution, AI behavior monitoring, and real-time peer transfers.",
+  "main": "eslint.config.js",
+>>>>>>> a615ae49d0101f71a116b2418611a9f81b4a7813
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/metapay-creator/MetaPayP2P.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/metapay-creator/MetaPayP2P/issues"
+  },
+  "homepage": "https://github.com/metapay-creator/MetaPayP2P#readme"
+}
