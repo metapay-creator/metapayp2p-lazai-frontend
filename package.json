@@ -1,20 +1,8 @@
 {
-<<<<<<< HEAD
-  "name": "metapayp2p-dapp",
-  "private": true,
-  "version": "1.0.0",
-  "description": "A circulating basic income simulation with blockchain distribution, AI behavior monitoring, and real-time peer transfers.",
-  "main": "server.js",
-  "type": "module",
-  "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-=======
   "name": "metapay-p2p",
   "private": true,
   "version": "1.0.0",
   "scripts": {
->>>>>>> a615ae49d0101f71a116b2418611a9f81b4a7813
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
@@ -39,14 +27,11 @@
     "globals": "^16.3.0",
     "vite": "^7.0.4"
   },
-<<<<<<< HEAD
-=======
-  "description": "> A circulating basic income simulation with blockchain distribution, AI behavior monitoring, and real-time peer transfers.",
-  "main": "eslint.config.js",
->>>>>>> a615ae49d0101f71a116b2418611a9f81b4a7813
+  "description": "A circulating basic income simulation with blockchain distribution, AI behavior monitoring, and real-time peer transfers.",
+  "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/metapay-creator/MetaPayP2P.git"
+    "url": "https://github.com/metapay-creator/MetaPayP2P"
   },
   "keywords": [],
   "author": "",
