@@ -61,3 +61,22 @@ Please contact: anioia33@gmail.com for licensing inquiries.
 
 MIT License (with commercial use restriction)
 © 2025 Gyuha Yoon – MetaPay Project for HyperHack
+
+---
+
+## 📝 Smart Contract Source
+
+The complete Solidity smart contract is included in the `/contracts` folder.
+
+- **Contract File:** [`MetaPayP2P_Complete.sol`](./contracts/MetaPayP2P_Complete.sol)
+- **Deployed Address:** `0xDFB314c65E8f3e4D6f4Cfac892Fa145b2688E44F` (Sepolia Testnet)
+- **Deployed via:** Remix IDE  
+- **ABI Source:** [`/src/abi.js`](./src/abi.js)  
+
+This contract handles:
+- National fund distribution
+- Peer-to-peer transactions
+- Corporate account tracking & recollection
+- Transaction record logic for AI analysis
+
+---
