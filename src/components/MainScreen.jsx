@@ -59,8 +59,15 @@ function MainScreen({
   };
 
   const addAlert = (type, message) => {
-    setAlerts((prev) => [...prev, { type, message }].slice(-7));
+    setAlerts((prev) => [...prev, { type, message }]);
   };
+
+  // ✅ 알람 20줄 강제 유지
+  useEffect(() => {
+    if (alerts.length > 20) {
+      setAlerts((prev) => prev.slice(-20));
+    }
+  }, [alerts]);
 
   const checkTransferRules = ({ inflowAmount, plannedOutflowAmount, senderBalance, transferAmount }) => {
     const warnings = [];
