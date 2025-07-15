@@ -1,82 +1,132 @@
-# MetaPayP2P – Web3 Basic Income Simulation with AI & Peer Transfers (Powered by OpenAI API)
+# MetaPayP2P — Web3 Basic Income Simulation with AI & Peer Transfers
+*(Powered by OpenAI API)*
 
-![License: Custom MIT (no commercial use)](https://img.shields.io/badge/license-MIT--No--Commercial--Use-red)
+![License: Custom MIT (No Commercial Use)](https://img.shields.io/badge/license-MIT--No--Commercial--Use-red)
 
-A blockchain-based universal basic income simulation that includes peer-to-peer transactions and AI-powered reasoning logic using the OpenAI API.
+---
 
-## 🌍 Overview
-MetaPayP2P is a Web3-based simulation model of a circulating basic income system:
-- A national wallet distributes funds to 10 citizen wallets.
-- Citizens can conduct peer-to-peer (P2P) transfers based on logic or AI suggestions.
-- Every 10 distribution cycles, 10% of balances are collected back to ensure sustainability.
-- AI logic is powered by the OpenAI API to simulate economic decision-making.
-- Built with Solidity smart contracts, Vite + React frontend, and Node.js backend.
+## 🌍 Project Overview
+
+**MetaPayP2P** is a Web3-based simulation of a **circulating basic income system** designed by **Gyuha Yoon**.
+Its purpose is to demonstrate a sustainable economic model where income is continuously circulated rather than endlessly printed.
+
+- ✅ **National Wallet** distributes funds equally to **10 citizen wallets** over **10 distribution rounds**.
+- ✅ After every **10 distributions**, **10% of citizen balances are recollected**.
+- ✅ This **Distribute → Recollect → Repeat** cycle ensures sustainability.
+- ✅ Citizens are free to engage in **peer-to-peer (P2P) transfers** anytime, simulating a real economic ecosystem.
+- ✅ **Alith AI** monitors economic activity and warns of imbalances or risks.
+- ✅ **OpenAI API** powers AI-generated behavior logic and intelligent alerts.
+
+---
 
 ## 🔧 Tech Stack
-- **Smart Contract:** Solidity
-- **Frontend:** React (Vite)
-- **Backend:** Node.js + Express
-- **Blockchain:** Ethereum testnet
-- **AI Integration:** OpenAI API (analyze.js / server.js)
-- **Wallet Integration:** MetaMask (for testers)
+
+| Layer | Technology |
+|---|---|
+| **Smart Contract** | Solidity (Ethereum Sepolia Testnet) |
+| **Frontend** | React (Vite) |
+| **Backend** | Node.js + Express |
+| **Blockchain** | Ethereum Sepolia |
+| **AI Integration** | OpenAI API (`analyze.js` / `server.js`) |
+| **Wallet** | MetaMask |
+
+---
 
 ## 📁 Project Structure
+
 ```
 vite-project/
 ├── src/
-│   ├── App.jsx              # Main frontend logic
-│   └── abi.js               # ABI and contract address
+│   ├── App.jsx              # Frontend Logic
+│   └── abi.js               # Contract ABI & Address
 ├── ai-server/
-│   ├── server.js            # Express server with OpenAI API call
-│   └── analyze.js           # AI reasoning logic
+│   ├── server.js            # OpenAI API Call Handler
+│   └── analyze.js           # AI Logic
+├── contracts/
+│   └── MetaPayP2P_Complete.sol   # Solidity Smart Contract
 ├── public/
 ├── LICENSE
 └── README.md
 ```
 
+---
+
 ## 🚀 Getting Started
-1. Install dependencies:
-```bash
+
+1️⃣ Install dependencies  
+```
 npm install
 ```
-2. Run frontend:
-```bash
+
+2️⃣ Run frontend (Vite)  
+```
 npm run dev
 ```
-3. Run backend (AI server):
-```bash
+
+3️⃣ Run AI backend server  
+```
 cd ai-server
 node server.js
 ```
 
-## 🤖 AI-Driven Behavior
-Users simulate AI-guided interactions:
-- Proportional transfers (e.g. salary)
-- Logic-based redistribution
-- Collective behaviors suggested by OpenAI API
+---
 
-## ⚠️ License Notice
-This project is protected by copyright. Unauthorized **commercial use** is strictly prohibited.
-Please contact: anioia33@gmail.com for licensing inquiries.
+## 🧠 Alith AI (Alice AI) — Behavior Analysis & Risk Warning
 
-MIT License (with commercial use restriction)
-© 2025 Gyuha Yoon – MetaPay Project for HyperHack
+**Alith AI** acts as a simulated AI agent that:  
+- 🧩 Analyzes transaction behaviors and P2P transfers  
+- ⚖️ Monitors inflow vs. outflow for each corporate account  
+- 📢 Generates risk warnings based on behavior patterns  
+- 💬 Integrates with OpenAI API for natural language explanations  
 
 ---
 
-## 📝 Smart Contract Source
+## 🤖 AI-Driven Behavior Logic
 
-The complete Solidity smart contract is included in the `/contracts` folder.
+With the power of OpenAI API, MetaPayP2P simulates intelligent interactions such as:  
+- 📊 Proportional transfers (e.g., salary)  
+- 📉 Risk-based warnings for over-expenditure or liquidity issues  
+- 📝 AI-generated suggestions for economic balancing  
 
-- **Contract File:** [`MetaPayP2P_Complete.sol`](./contracts/MetaPayP2P_Complete.sol)
-- **Deployed Address:** `0xDFB314c65E8f3e4D6f4Cfac892Fa145b2688E44F` (Sepolia Testnet)
-- **Deployed via:** Remix IDE  
+---
+
+## 📝 Smart Contract Details
+
+- **Contract Source:** [`MetaPayP2P_Complete.sol`](./contracts/MetaPayP2P_Complete.sol)  
+- **Deployed Address:** `0xDFB314c65E8f3e4D6f4Cfac892Fa145b2688E44F` *(Sepolia Testnet)*  
+- **Deployment Tool:** Remix IDE  
 - **ABI Source:** [`/src/abi.js`](./src/abi.js)  
 
-This contract handles:
-- National fund distribution
-- Peer-to-peer transactions
-- Corporate account tracking & recollection
-- Transaction record logic for AI analysis
+Core Functions:  
+- National fund distribution  
+- Peer-to-peer transaction handling  
+- Corporate account tracking & recollection logic  
+- Transaction record logging for AI analysis  
 
 ---
+
+## 🔗 Links
+
+- 📝 **GitHub Repository:** [MetaPayP2P-Clean](https://github.com/metapay-creator/MetaPayP2P-Clean)  
+- ▶️ **YouTube Channel:** [MetaPay Project](https://www.youtube.com/@MetaPayProject)  
+- 💻 **Testnet Simulation (DApp):** *(Link Coming Soon)*  
+- ❌ **Twitter (X):** [@metapay_creator](https://x.com/metapay_creator)  
+
+---
+
+## ⚖️ License Notice
+
+© 2025 Gyuha Yoon — MetaPay Project for HyperHack  
+
+This project is licensed under the **MIT License with Commercial Use Restriction**.  
+> ❗ **Commercial use is strictly prohibited without permission.**  
+
+For licensing inquiries, contact: **anioia33@gmail.com**  
+
+---
+
+## 📢 Contact
+
+📧 **anioia33@gmail.com**  
+GitHub: [metapay-creator](https://github.com/metapay-creator)  
+Twitter: [@metapay_creator](https://x.com/metapay_creator)  

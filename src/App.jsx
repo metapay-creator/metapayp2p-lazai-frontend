@@ -1,210 +1,135 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ethers } from "ethers";
 import { abi, contractAddress } from "./abi";
+import WelcomeScreen from "./components/WelcomeScreen";
+import MainScreen from "./components/MainScreen";
 
 function App() {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
   const [connectedWallet, setConnectedWallet] = useState("");
+  const [alerts, setAlerts] = useState([]);
+  const [showMainScreen, setShowMainScreen] = useState(false);
+
+  const [userBalances, setUserBalances] = useState(Array(10).fill(0));
+  const [userCashBalances, setUserCashBalances] = useState([100000, 50000, 50000, 10000, 5000, 20000, 8000, 9000, 500, 300]);
+  const [companyBalances, setCompanyBalances] = useState(Array(5).fill(0));
+  const [companyCashBalances, setCompanyCashBalances] = useState([500000, 300000, 100000, 50000, 10000]);
+  const [incomeData, setIncomeData] = useState(Array(10).fill({ amount: 0, shown: false }));
+
   const [nationalBalance, setNationalBalance] = useState(0);
-  const [balances, setBalances] = useState([]);
-  const [recipient, setRecipient] = useState("");
-  const [amount, setAmount] = useState("");
-  const [p2pResult, setP2pResult] = useState("");
-  const [alerts, setAlerts] = useState([]); // AI 경고 메시지
-
-  const userLabels = [
-    "User1", "User2", "User3", "User4", "User5",
-    "User6", "User7", "User8", "User9", "User10"
-  ];
-
-  const userAddresses = [
-    "0xcAEc83c59b3FbfE65cC73828e9c89b9c07902105",
-    "0x3C39f84a28673bdbA9f19eaAd26e04d95795260C",
-    "0x9D2b9Acad30E1D2a0bb81e96816506C166F2076A",
-    "0x37f047f304B49cE83b5630BCb1D6DF4b05eeD305",
-    "0x4194b9E02e733f112b2b44f40554DAB0EA60b470",
-    "0xc95132B717cFCac125423e07429e8894D18c357B",
-    "0xA0831b8e8628b2C683cd98Fd17020d2376582073",
-    "0x5317F13e44d02E44c899010D4Fb11985657c26D8",
-    "0x4f4728FA3FF45b5459Bfb64C5CD0D78FaEBe12f6",
-    "0xA80E21304603C453f416bE77b210ED0AFf400ed7"
-  ];
+  const [distributionCount, setDistributionCount] = useState(0);
 
   const connectWallet = async () => {
     if (window.ethereum) {
-      const ethProvider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await ethProvider.getSigner();
-      const address = await signer.getAddress();
-      const contract = new ethers.Contract(contractAddress, abi, signer);
+      try {
+        const ethProvider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await ethProvider.getSigner();
+        const address = await signer.getAddress();
+        const contractInstance = new ethers.Contract(contractAddress, abi, signer);
 
-      setProvider(ethProvider);
-      setSigner(signer);
-      setConnectedWallet(address);
-      setContract(contract);
+        setProvider(ethProvider);
+        setSigner(signer);
+        setContract(contractInstance);
+        setConnectedWallet(address);
+        setShowMainScreen(true);
+      } catch (err) {
+        console.error("Wallet Connection Error:", err);
+        alert("❌ Failed to connect wallet.");
+      }
     } else {
-      alert("MetaMask not detected");
+      alert("❌ MetaMask not detected.");
     }
   };
 
-  const checkBalances = async () => {
-    if (!contract) return;
-    const data = await contract.checkAllBalances();
-    const national = Number(data[0]);
-    const userBalances = data[1].map((b) => Number(b));
-    setNationalBalance(national);
-    setBalances(userBalances);
-  };
-
-  const distribute = async () => {
-    if (!contract) return;
+  const handleDistribute = async () => {
+  if (!contract) return;
+  try {
     const tx = await contract.distribute();
     await tx.wait();
-    checkBalances();
-  };
 
-  const collect = async () => {
+    setUserCashBalances(prev => prev.map(cash => cash + 300));  // ✅ 이걸 먼저!
+    setCompanyCashBalances(prev => prev.map(cash => cash + 300));  // ✅ 그리고
+    await fetchBalances();  // ✅ 마지막에 호출해야 함
+
+    setDistributionCount(prev => prev + 1);
+    setAlerts(prev => [...prev, { type: "success", message: "✅ Distribution success" }]);
+  } catch (err) {
+    console.error("Distribute Error:", err);
+    setAlerts(prev => [...prev, { type: "error", message: "❌ Distribution failed" }]);
+  }
+};
+
+  const handleCollect = async () => {
     if (!contract) return;
-    const tx = await contract.collect();
-    await tx.wait();
-    checkBalances();
-  };
-
-  const resetAll = async () => {
-    if (!contract) return;
-    const tx = await contract.resetAll();
-    await tx.wait();
-    checkBalances();
-  };
-
-  const sendP2PTransfer = async () => {
-    if (!recipient || !amount) {
-      setP2pResult("Please enter recipient address and amount.");
-      return;
-    }
-
     try {
-      const tx = await contract.transfer(recipient, Number(amount));
+      const tx = await contract.collect();
       await tx.wait();
-      setP2pResult(`✅ Sent ${amount} to ${recipient}`);
-      checkBalances();
-    } catch (error) {
-      setP2pResult(`❌ Transfer failed: ${error.message}`);
+      await fetchBalances();
+      setAlerts(prev => [...prev, { type: "success", message: "✅ Collection success" }]);
+    } catch (err) {
+      console.error("Collect Error:", err);
+      setAlerts(prev => [...prev, { type: "error", message: "❌ Collection failed" }]);
     }
   };
 
-  // ✅ 수정된 AI 분석 함수
-  const analyzeWithAI = async () => {
-    if (!balances || balances.length === 0) return;
-
-    const users = userLabels.map((label, i) => ({
-      label,
-      address: userAddresses[i],
-      balance: balances[i],
-    }));
-
-    const transactions = [
-      {
-        from: userAddresses[0],
-        to: userAddresses[1],
-        amount: 200,
-      },
-      {
-        from: userAddresses[2],
-        to: userAddresses[4],
-        amount: 300,
-      },
-    ];
-
+  const handleReset = async () => {
+    if (!contract) return;
     try {
-      const response = await fetch("http://localhost:3001/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ users, transactions }),
-      });
-
-      const data = await response.json();
-      if (data.result) {
-        const points = data.result
-          .split("\n")
-          .filter((line) => line.trim().startsWith("•") || line.trim().startsWith("-"))
-          .map((line) => line.replace(/^[-•]\s*/, ""));
-
-        setAlerts(points);
-      } else {
-        setAlerts(["❌ No analysis result returned."]);
-      }
-    } catch (error) {
-      console.error("AI Analysis Error:", error);
-      setAlerts(["❌ AI analysis failed."]);
+      const tx = await contract.resetAll();
+      await tx.wait();
+      await fetchBalances();
+      setAlerts(prev => [...prev, { type: "success", message: "✅ Reset success" }]);
+      setUserCashBalances([100000, 50000, 50000, 10000, 5000, 20000, 8000, 9000, 500, 300]);
+      setCompanyCashBalances([500000, 300000, 100000, 50000, 10000]);
+      setDistributionCount(0);
+    } catch (err) {
+      console.error("Reset Error:", err);
+      setAlerts(prev => [...prev, { type: "error", message: "❌ Reset failed" }]);
     }
   };
 
-  useEffect(() => {
-    connectWallet();
-  }, []);
+  const fetchBalances = async () => {
+    if (!contract) return;
+    try {
+      const result = await contract.checkAllBalances();
+      setNationalBalance(Number(result[0]));
+      setUserBalances(result[1].map(bn => Number(bn)));
+      setCompanyBalances(result[2].map(bn => Number(bn)));
+      setAlerts(prev => [...prev, { type: "success", message: "✅ Balances fetched" }]);
+    } catch (err) {
+      console.error("Fetch Balances Error:", err);
+      setAlerts(prev => [...prev, { type: "error", message: "❌ Failed to fetch balances" }]);
+    }
+  };
 
   return (
-    <div style={{ padding: "40px", fontFamily: "Arial" }}>
-      <h1>MetaPayP2P Simulation</h1>
-      <p>Connected wallet: {connectedWallet}</p>
-      <p>National wallet balance: {nationalBalance}</p>
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px", marginTop: "20px" }}>
-        {userLabels.map((label, index) => (
-          <div key={index} style={{
-            border: "1px solid #ccc",
-            padding: "10px",
-            textAlign: "center",
-            position: "relative"
-          }}>
-            <strong>{label}</strong>
-            <div>{balances[index] || 0}</div>
-            {alerts[index] && (
-              <div style={{
-                color: "red",
-                fontSize: "12px",
-                marginTop: "6px"
-              }}>
-                ⚠ {alerts[index]}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div style={{ marginTop: "30px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
-        <button onClick={distribute}>Distribute</button>
-        <button onClick={collect}>Collect</button>
-        <button onClick={resetAll}>Reset</button>
-        <button onClick={checkBalances}>Check Balances</button>
-        <button onClick={analyzeWithAI}>AI Analyze</button>
-      </div>
-
-      <h3 style={{ marginTop: "30px" }}>P2P Transfer</h3>
-      <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-        <input
-          type="text"
-          placeholder="Recipient address"
-          value={recipient}
-          onChange={(e) => setRecipient(e.target.value)}
-          style={{ flex: 1 }}
+    <>
+      {showMainScreen ? (
+        <MainScreen
+          connectedWallet={connectedWallet}
+          contract={contract}
+          alerts={alerts}
+          setAlerts={setAlerts}
+          userBalances={userBalances}
+          userCashBalances={userCashBalances}
+          companyBalances={companyBalances}
+          companyCashBalances={companyCashBalances}
+          incomeData={incomeData}
+          nationalBalance={nationalBalance}
+          onDistribute={handleDistribute}
+          onCollect={handleCollect}
+          onReset={handleReset}
+          onFetchBalances={fetchBalances}
+          distributionCount={distributionCount}
+          setUserCashBalances={setUserCashBalances}
+          setCompanyCashBalances={setCompanyCashBalances}
         />
-        <input
-          type="number"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          style={{ width: "100px" }}
-        />
-        <button onClick={sendP2PTransfer}>Send</button>
-      </div>
-
-      <div style={{ color: "gray", minHeight: "24px" }}>
-        {p2pResult}
-      </div>
-    </div>
+      ) : (
+        <WelcomeScreen onConnect={connectWallet} />
+      )}
+    </>
   );
 }
 

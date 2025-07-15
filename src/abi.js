@@ -1,4 +1,4 @@
-export const contractAddress = "0xDFB314c65E8f3e4D6f4Cfac892Fa145b2688E44F"; // 실제 Remix에서 배포된 주소로 교체
+export const contractAddress = "0xbbCFB6cceD137567eD66420e23B7ef94b0fB05A0";
 
 export const abi = [
   {
@@ -41,54 +41,6 @@ export const abi = [
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_nationalWallet",
-        "type": "address"
-      },
-      {
-        "internalType": "address[]",
-        "name": "_users",
-        "type": "address[]"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [],
-    "name": "AMOUNT_PER_USER",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "balances",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "checkAllBalances",
     "outputs": [
@@ -101,6 +53,11 @@ export const abi = [
         "internalType": "uint256[]",
         "name": "userBalances",
         "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "companyBalances",
+        "type": "uint256[]"
       }
     ],
     "stateMutability": "view",
@@ -108,12 +65,12 @@ export const abi = [
   },
   {
     "inputs": [],
-    "name": "COLLECT_PERCENT",
+    "name": "getAllCompanies",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "address[]",
         "name": "",
-        "type": "uint256"
+        "type": "address[]"
       }
     ],
     "stateMutability": "view",
@@ -147,12 +104,12 @@ export const abi = [
   },
   {
     "inputs": [],
-    "name": "nationalWallet",
+    "name": "AMOUNT_PER_USER",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "uint256",
         "name": "",
-        "type": "address"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -160,7 +117,20 @@ export const abi = [
   },
   {
     "inputs": [],
-    "name": "owner",
+    "name": "COLLECT_PERCENT",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nationalWallet",
     "outputs": [
       {
         "internalType": "address",
@@ -180,6 +150,25 @@ export const abi = [
       }
     ],
     "name": "users",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "companies",
     "outputs": [
       {
         "internalType": "address",

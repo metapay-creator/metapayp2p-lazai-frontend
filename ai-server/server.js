@@ -1,4 +1,3 @@
-
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -90,6 +89,43 @@ Return in Markdown list format.
   } catch (error) {
     console.error("Summary API error:", error);
     res.status(500).json({ summary: "❌ Error generating summary." });
+  }
+});
+
+// ✅ Alith AI 판단용 분석 API
+app.post("/api/ai-check-transfer", async (req, res) => {
+  const { inflowAmount, plannedOutflowAmount, senderBalance, transferAmount } = req.body;
+
+  const prompt = `
+You are an AI assistant analyzing blockchain-based financial transactions.
+
+Given the following data:
+- Company inflow amount: ${inflowAmount}
+- Planned user outflow amount: ${plannedOutflowAmount}
+- Sender's current balance: ${senderBalance}
+- Intended transfer amount: ${transferAmount}
+
+Analyze this scenario and return a short recommendation in human language, such as:
+- "✅ The transfer is within safe limits."
+- "❗ Warning: The transfer exceeds the company inflow amount."
+- "⚠️ Caution: The sender is attempting to send more than 50% of their balance."
+- "❗ Critical: Sender's balance is zero."
+
+Respond with a single concise recommendation.
+`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    });
+
+    const aiResult = completion.choices[0].message.content;
+    res.json({ result: aiResult });
+  } catch (error) {
+    console.error("AI Check Transfer Error:", error);
+    res.status(500).json({ error: "AI check failed" });
   }
 });
 
