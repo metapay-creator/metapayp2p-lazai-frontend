@@ -47,6 +47,18 @@ function MainScreen({
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
 
+useEffect(() => {
+  const audio = new Audio("/sound/main.mp3");
+  audio.volume = 0.3;
+  audio.loop = true;
+  audio.play();
+
+  return () => {
+    audio.pause();
+    audio.currentTime = 0;
+  };
+}, []);
+
   const userAddresses = [/* user addresses */];
   const companyAddresses = [/* company addresses */];
 

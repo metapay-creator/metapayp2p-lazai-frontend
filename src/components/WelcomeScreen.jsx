@@ -8,6 +8,13 @@ function WelcomeScreen({ onConnect }) {
     await loadFull(main);
   };
 
+  const handleStart = () => {
+    const audio = new Audio("/sound/welcome.mp3");
+    audio.volume = 0.7;
+    audio.play();
+    onConnect();
+  };
+
   return (
     <div style={{
       width: "100vw",
@@ -44,21 +51,6 @@ function WelcomeScreen({ onConnect }) {
           width: "100%",
           height: "100%"
         }}
-      />
-
-      <motion.div
-        style={{
-          position: "absolute",
-          top: "-150px",
-          right: "-150px",
-          width: "300px",
-          height: "300px",
-          background: "rgba(255, 255, 255, 0.02)",
-          borderRadius: "50%",
-          zIndex: 0
-        }}
-        animate={{ y: [0, 100, 0] }}
-        transition={{ repeat: Infinity, duration: 30, ease: "easeInOut" }}
       />
 
       <motion.img
@@ -139,7 +131,7 @@ function WelcomeScreen({ onConnect }) {
           boxShadow: "0 6px 15px rgba(0,0,0,0.6)",
           zIndex: 1
         }}
-        onClick={onConnect}
+        onClick={handleStart}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
       >
