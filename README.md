@@ -205,6 +205,13 @@ With the power of OpenAI API, MetaPayP2P simulates intelligent interactions such
 - 🔥 **💻 Testnet Simulation (DApp):** [https://meta-pay-p2-p-clean-7aig.vercel.app](https://meta-pay-p2-p-clean-7aig.vercel.app)  
 - ❌ **Twitter (X):** [@metapay_creator](https://x.com/metapay_creator)  
 
+## 📄 Official User Guide (Must Read)
+
+[📄 MetaPayP2P User Manual (Google Drive)](https://drive.google.com/file/d/1SAVL8EIXByRPtT2VqP7soc3sPb3JSiUK/view?usp=sharing)
+
+---
+
+
 ---
 
 ## ⚖️ License Notice
