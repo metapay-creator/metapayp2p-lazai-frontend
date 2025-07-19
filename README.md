@@ -18,9 +18,20 @@ Its purpose is to demonstrate a sustainable economic model where income is conti
 
 ---
 
+## 💡 Why MetaPay Matters
+
+- 🔄 Demonstrates a tax-free, sustainable circulating basic income model.
+- 🏛️ Offers a scalable concept for real-world pilot programs.
+- 🤖 Integrates AI-driven behavior analysis for responsible financial interaction.
+- 💬 Promotes transparent peer-to-peer economic activities on blockchain.
+
+---
+
 ## 💹 MetaPay Circulation Model Overview
 
 The chart below illustrates the MetaPay Basic Income Circulation Model:
+
+![MetaPay Circulation Chart](./public/metapay_full_flow_chart.png)
 
 - 🟩 Monthly distribution (green)  
 - 🟥 Recollection every 10 rounds (red)  
@@ -29,11 +40,44 @@ The chart below illustrates the MetaPay Basic Income Circulation Model:
 > This graph demonstrates how the balance grows with 10 cycles of distribution and stabilizes through periodic recollection, enabling a sustainable circulation model of basic income.
 
 **Important:**  
-In the MetaPay simulation, the national wallet must follow a strict cycle of 10 rounds of distribution followed by 1 round of recollection, repeated continuously.  
-This ensures the balance circulation model remains sustainable and reflects the core principle of this basic income theory.
+In the MetaPay simulation, the national wallet must follow a strict cycle of **10 rounds of distribution followed by 1 round of recollection**, repeated continuously.  
 
-Additionally, all peer-to-peer (P2P) transactions between users, as well as transactions between users and companies, are allowed at any time without restrictions.  
-This simulates free-market interactions within the system.
+If after 10 distributions and 1 recollection the **National Wallet balance remains at 4999**, the system requires **manual adjustment** by transferring **1 unit** from a **user wallet holding an odd amount of MetaPay** back to the National Wallet.  
+
+This allows the next distribution to proceed normally.
+
+> In real-life pilot projects, population increase or decrease may require manual adjustment accounts or automated balancing bots to stabilize the circulation system.
+
+---
+
+## 🏛️ Real-World Pilot Project Consideration
+
+MetaPay’s model suggests implementing either:
+
+- ✅ **Manual Adjustment Accounts** for population fluctuations  
+- ✅ **Automated Balancing Bots** integrated with on-chain monitoring tools  
+
+This allows seamless adaptation even in dynamic economic environments.
+
+---
+
+## 🛣️ Roadmap
+
+- ✅ Phase 1: Simulation & AI Behavior Analysis (Completed)
+- 🔄 Phase 2: Automated Balancing Mechanism (Planned)
+- 🏛️ Phase 3: Institutional Pilot Testing with Governments/NGOs (Planned)
+
+---
+
+## 👥 Want to Join as a Tester?
+
+We are onboarding testers for the next round of MetaPayP2P simulation.  
+📧 Contact us at anioia33@gmail.com  
+
+---
+
+> “MetaPay is not just a simulation — it’s a vision for a freer, sustainable economy.”  
+> — Gyuha Yoon, Creator of MetaPay  
 
 ---
 
@@ -63,6 +107,7 @@ vite-project/
 ├── contracts/
 │   └── MetaPayP2P_Complete.sol   # Solidity Smart Contract
 ├── public/
+│   └── metapay_full_flow_chart.png
 ├── LICENSE
 └── README.md
 ```
@@ -89,7 +134,7 @@ node server.js
 
 ---
 
-## 🧠 Alith AI (Alice AI) — Behavior Analysis & Risk Warning  
+## 🧠 Alith AI (Alice AI) — Behavior Analysis & Risk Warning
 
 Alith AI acts as a behavior analysis engine that continuously monitors user transactions, P2P transfers, and corporate fund flows to detect potential risks or abnormal activities.  
 
@@ -102,7 +147,7 @@ It complements the OpenAI API by delivering context-aware warnings and balancing
 
 ---
 
-## 🤖 AI-Driven Behavior Logic  
+## 🤖 AI-Driven Behavior Logic
 
 With the power of OpenAI API, MetaPayP2P simulates intelligent interactions such as:
 
@@ -128,7 +173,7 @@ With the power of OpenAI API, MetaPayP2P simulates intelligent interactions such
 
 ---
 
-## 🗂️ Test Wallet Addresses  
+## 🗂️ Test Wallet Addresses
 
 ### 🧑 User Wallets  
 

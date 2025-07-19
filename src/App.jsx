@@ -45,16 +45,11 @@ function App() {
 
   useEffect(() => {
     if (window.ethereum) {
-      window.ethereum.on("accountsChanged", (accounts) => {
-        if (accounts.length > 0) {
-          setConnectedWallet(accounts[0]);
-          fetchBalances();
-        } else {
-          setConnectedWallet("");
-        }
+      window.ethereum.on("accountsChanged", () => {
+        connectWallet();
       });
     }
-  }, [contract]);
+  }, []);
 
   const handleDistribute = async () => {
     if (!contract) return;
