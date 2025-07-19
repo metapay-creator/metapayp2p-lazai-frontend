@@ -47,20 +47,38 @@ function MainScreen({
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
 
-useEffect(() => {
-  const audio = new Audio("/sound/main.mp3");
-  audio.volume = 0.3;
-  audio.loop = true;
-  audio.play();
+  useEffect(() => {
+    const audio = new Audio("/sound/main.mp3");
+    audio.volume = 0.3;
+    audio.loop = true;
+    audio.play();
 
-  return () => {
-    audio.pause();
-    audio.currentTime = 0;
-  };
-}, []);
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, []);
 
-  const userAddresses = [/* user addresses */];
-  const companyAddresses = [/* company addresses */];
+  const userAddresses = [
+    "0xcAEc83c59b3FbfE65cC73828e9c89b9c07902105",
+    "0x3C39f84a28673bdbA9f19eaAd26e04d95795260C",
+    "0x9D2b9Acad30E1D2a0bb81e96816506C166F2076A",
+    "0x37f047f304B49cE83b5630BCb1D6DF4b05eeD305",
+    "0x4194b9E02e733f112b2b44f40554DAB0EA60b470",
+    "0xc95132B717cFCac125423e07429e8894D18c357B",
+    "0xA0831b8e8628b2C683cd98Fd17020d2376582073",
+    "0x5317F13e44d02E44c899010D4Fb11985657c26D8",
+    "0x4f4728FA3FF45b5459Bfb64C5CD0D78FaEBe12f6",
+    "0xA80E21304603C453f416bE77b210ED0AFf400ed7"
+  ];
+
+  const companyAddresses = [
+    "0x235a5a253873e1DfDE4AB970C3C8bBDB4A962b5b",
+    "0x65077De588c690D2BAA9c83B783E378445B69C18",
+    "0x8266893251a5CEa9b88701044aa5D8b1D1a9C64f",
+    "0xb18BAdd5FeBe08489c7F0aFc54c77e55133360ce",
+    "0x527F433024e646e44d479D4396D53B5544D88D84"
+  ];
 
   const getShortName = (address) => {
     const userIdx = userAddresses.findIndex(a => a.toLowerCase() === address.toLowerCase());
@@ -74,7 +92,6 @@ useEffect(() => {
     setAlerts((prev) => [...prev, { type, message }]);
   };
 
-  // ✅ 알람 20줄 강제 유지
   useEffect(() => {
     if (alerts.length > 20) {
       setAlerts((prev) => prev.slice(-20));
@@ -83,9 +100,15 @@ useEffect(() => {
 
   const checkTransferRules = ({ inflowAmount, plannedOutflowAmount, senderBalance, transferAmount }) => {
     const warnings = [];
-    if (plannedOutflowAmount > inflowAmount) warnings.push(`❗ 지급 예정 금액(${plannedOutflowAmount})이 기업 유입 금액(${inflowAmount})보다 많습니다.`);
-    if (senderBalance === 0) warnings.push("❗ 현재 메타페이 잔액이 0입니다. 송금은 가능하지만 위험할 수 있습니다.");
-    if (transferAmount > senderBalance * 0.5) warnings.push(`⚠️ 보유 잔액의 50%(${(senderBalance * 0.5).toFixed(2)}) 이상을 송금하려고 합니다.`);
+    if (plannedOutflowAmount > inflowAmount && inflowAmount > 0) 
+      warnings.push(`❗ 지급 예정 금액(${plannedOutflowAmount})이 기업 유입 금액(${inflowAmount})보다 많습니다.`);
+
+    if (typeof senderBalance === 'number' && senderBalance === 0) 
+      warnings.push("❗ 현재 메타페이 잔액이 0입니다. 송금은 가능하지만 위험할 수 있습니다.");
+
+    if (senderBalance > 0 && transferAmount > senderBalance * 0.5) 
+      warnings.push(`⚠️ 보유 잔액의 50%(${(senderBalance * 0.5).toFixed(2)}) 이상을 송금하려고 합니다.`);
+
     return warnings;
   };
 
@@ -100,7 +123,17 @@ useEffect(() => {
   const sendP2P = async () => {
     if (!recipient || !amount) return;
     const senderIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
-    const senderBalance = userBalances[senderIdx] || 0;
+    if (senderIdx === -1) {
+      addAlert("warning", "❗ 현재 연결된 지갑은 등록된 사용자 지갑이 아닙니다.");
+      return;
+    }
+
+    const senderBalance = userBalances[senderIdx];
+    if (senderBalance === undefined) {
+      addAlert("warning", "❗ 사용자 잔액 정보를 불러오는 중입니다. 다시 시도하세요.");
+      return;
+    }
+
     const totalCompanyInflow = companyBalances.reduce((acc, bal) => acc + bal, 0);
     const totalUserOutflow = userBalances.reduce((acc, bal) => acc + bal, 0);
 
