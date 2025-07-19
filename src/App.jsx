@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { abi, contractAddress } from "./abi";
 import WelcomeScreen from "./components/WelcomeScreen";
@@ -43,23 +43,36 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    if (window.ethereum) {
+      window.ethereum.on("accountsChanged", (accounts) => {
+        if (accounts.length > 0) {
+          setConnectedWallet(accounts[0]);
+          fetchBalances();
+        } else {
+          setConnectedWallet("");
+        }
+      });
+    }
+  }, [contract]);
+
   const handleDistribute = async () => {
-  if (!contract) return;
-  try {
-    const tx = await contract.distribute();
-    await tx.wait();
+    if (!contract) return;
+    try {
+      const tx = await contract.distribute();
+      await tx.wait();
 
-    setUserCashBalances(prev => prev.map(cash => cash + 300));  // ✅ 이걸 먼저!
-    setCompanyCashBalances(prev => prev.map(cash => cash + 300));  // ✅ 그리고
-    await fetchBalances();  // ✅ 마지막에 호출해야 함
+      setUserCashBalances(prev => prev.map(cash => cash + 300));
+      setCompanyCashBalances(prev => prev.map(cash => cash + 300));
+      await fetchBalances();
 
-    setDistributionCount(prev => prev + 1);
-    setAlerts(prev => [...prev, { type: "success", message: "✅ Distribution success" }]);
-  } catch (err) {
-    console.error("Distribute Error:", err);
-    setAlerts(prev => [...prev, { type: "error", message: "❌ Distribution failed" }]);
-  }
-};
+      setDistributionCount(prev => prev + 1);
+      setAlerts(prev => [...prev, { type: "success", message: "✅ Distribution success" }]);
+    } catch (err) {
+      console.error("Distribute Error:", err);
+      setAlerts(prev => [...prev, { type: "error", message: "❌ Distribution failed" }]);
+    }
+  };
 
   const handleCollect = async () => {
     if (!contract) return;
