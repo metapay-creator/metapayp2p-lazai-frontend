@@ -99,18 +99,19 @@ function MainScreen({
   }, [alerts]);
 
   const checkTransferRules = ({ inflowAmount, plannedOutflowAmount, senderBalance, transferAmount }) => {
-    const warnings = [];
-    if (plannedOutflowAmount > inflowAmount && inflowAmount > 0)
-      warnings.push(`❗ 지급 예정 금액(${plannedOutflowAmount})이 기업 유입 금액(${inflowAmount})보다 많습니다.`);
+  const warnings = [];
+  if (plannedOutflowAmount > inflowAmount && inflowAmount > 0)
+    warnings.push(`❗ Planned payout (${plannedOutflowAmount}) exceeds company inflow (${inflowAmount}).`);
 
-    if (typeof senderBalance === 'number' && senderBalance === 0)
-      warnings.push("❗ 현재 메타페이 잔액이 0입니다. 송금은 가능하지만 위험할 수 있습니다.");
+  if (typeof senderBalance === 'number' && senderBalance === 0)
+    warnings.push("❗ Current MetaPay balance is 0. Transfer is possible but may be risky.");
 
-    if (senderBalance > 0 && transferAmount > senderBalance * 0.5)
-      warnings.push(`⚠️ 보유 잔액의 50%(${(senderBalance * 0.5).toFixed(2)}) 이상을 송금하려고 합니다.`);
+  if (senderBalance > 0 && transferAmount > senderBalance * 0.5)
+    warnings.push(`⚠️ You are trying to transfer more than 50% of your MetaPay balance (${(senderBalance * 0.5).toFixed(2)}).`);
 
-    return warnings;
-  };
+  return warnings;
+};
+
 
   const handleDistributeWithCash = async () => {
     await onDistribute();
@@ -123,17 +124,18 @@ function MainScreen({
   const sendP2P = async () => {
     if (!recipient || !amount) return;
 
-    const senderIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
-    if (senderIdx === -1) {
-      addAlert("warning", "❗ 현재 연결된 지갑은 등록된 사용자 지갑이 아닙니다.");
-      return;
-    }
+   const senderIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
+if (senderIdx === -1) {
+  addAlert("warning", "❗ The connected wallet is not a registered user wallet.");
+  return;
+}
 
-    const senderBalance = userBalances[senderIdx];
-    if (senderBalance === undefined) {
-      addAlert("warning", "❗ 사용자 잔액 정보를 불러오는 중입니다. 다시 시도하세요.");
-      return;
-    }
+const senderBalance = userBalances[senderIdx];
+if (senderBalance === undefined) {
+  addAlert("warning", "❗ Unable to fetch user balance. Please try again.");
+  return;
+}
+
 
     const totalCompanyInflow = companyBalances.reduce((acc, bal) => acc + bal, 0);
     const totalUserOutflow = userBalances.reduce((acc, bal) => acc + bal, 0);
@@ -171,18 +173,19 @@ function MainScreen({
     if (contract) onFetchBalances();
   }, [contract]);
 
-  const handleCollectWithCheck = async () => {
-    await onCollect();
-    await onFetchBalances();
+ const handleCollectWithCheck = async () => {
+  await onCollect();
+  await onFetchBalances();
 
-    const expectedTotal = 5000 * distributionCount;
-    const actualTotal = nationalBalance;
+  const expectedTotal = 5000 * distributionCount;
+  const actualTotal = nationalBalance;
 
-    if (actualTotal !== expectedTotal) {
-      const diff = expectedTotal - actualTotal;
-      addAlert("warning", `⚖️ 총 회수액이 5000이어야 합니다. 차액 ${diff} MetaPay 만큼 관리자 지갑에서 직접 송금하세요.`);
-    }
-  };
+  if (actualTotal < expectedTotal) {
+    const diff = expectedTotal - actualTotal;
+    addAlert("warning", `⚖️ Total collected amount should be ${expectedTotal}. Please send ${diff} MetaPay manually from the admin wallet.`);
+  }
+};
+
 
   return (
     <div className="page-wrapper">
