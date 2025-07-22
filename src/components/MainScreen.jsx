@@ -121,34 +121,61 @@ const aiAnalysis = () => {
 };
 
 const sendP2P = async () => {
-    if (!recipient || !amount) return;
-    const senderIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
-    if (senderIdx === -1) {
-      addAlert("warning", "❗ The connected wallet is not a registered user wallet.");
-      return;
-    }
+  if (!recipient || !amount) return;
+  const senderIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
+  const senderCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
 
-    try {
-      const tx = await contract.transfer(recipient, Number(amount));
-      await tx.wait();
-      onFetchBalances();
+  if (senderIdx === -1 && senderCompanyIdx === -1) {
+    addAlert("warning", "❗ The connected wallet is not a registered user or company wallet.");
+    return;
+  }
 
-      setUserCashBalances((prev) => {
+  try {
+    const tx = await contract.transfer(recipient, Number(amount));
+    await tx.wait();
+    onFetchBalances();
+
+    // Cash Handling
+    if (senderIdx !== -1) {
+      setUserCashBalances(prev => {
         const newCash = [...prev];
         newCash[senderIdx] -= Number(amount);
-        const recipientIdx = userAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
-        if (recipientIdx !== -1) newCash[recipientIdx] += Number(amount);
         return newCash;
       });
-
-      addAlert("success", `✅ Sent ${amount} to ${getShortName(recipient)}`);
-      setRecipient("");
-      setAmount("");
-    } catch (err) {
-      console.error("P2P Transfer Error", err);
-      addAlert("error", "❌ P2P Transfer failed");
+    } else if (senderCompanyIdx !== -1) {
+      setCompanyCashBalances(prev => {
+        const newCash = [...prev];
+        newCash[senderCompanyIdx] -= Number(amount);
+        return newCash;
+      });
     }
-  };
+
+    const recipientIdx = userAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
+    const recipientCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
+
+    if (recipientIdx !== -1) {
+      setUserCashBalances(prev => {
+        const newCash = [...prev];
+        newCash[recipientIdx] += Number(amount);
+        return newCash;
+      });
+    } else if (recipientCompanyIdx !== -1) {
+      setCompanyCashBalances(prev => {
+        const newCash = [...prev];
+        newCash[recipientCompanyIdx] += Number(amount);
+        return newCash;
+      });
+    }
+
+    addAlert("success", `✅ Sent ${amount} to ${getShortName(recipient)}`);
+    setRecipient("");
+    setAmount("");
+  } catch (err) {
+    console.error("P2P Transfer Error", err);
+    addAlert("error", "❌ P2P Transfer failed");
+  }
+};
+
 
 const sendCashOnly = async () => {
   if (!recipient || !amount) return;
