@@ -228,6 +228,7 @@ const sendCashOnly = async () => {
 };
 
 
+
 useEffect(() => {
   if (contract) onFetchBalances();
 }, [contract]);
