@@ -210,8 +210,16 @@ With the power of OpenAI API, MetaPayP2P simulates intelligent interactions such
 [📄 MetaPayP2P User Manual (Google Drive)](https://drive.google.com/file/d/1SAVL8EIXByRPtT2VqP7soc3sPb3JSiUK/view?usp=sharing)
 
 ---
+---
+## ℹ️ Note on Cash Handling
 
+The **cash transfer simulation** (💵) is handled entirely on the **frontend** for demonstration purposes only.  
+This allows flexible scenario creation for demo videos and user testing.  
+All **MetaPay (🪙)** transactions — including distributions and recollections — are processed via **on-chain smart contracts**.
 
+> 📝 The frontend cash logic does not affect blockchain behavior or smart contract operations.
+
+---
 ---
 
 ## ⚖️ License Notice
