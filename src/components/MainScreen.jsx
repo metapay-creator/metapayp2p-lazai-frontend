@@ -150,26 +150,56 @@ const sendP2P = async () => {
     }
   };
 
-  const sendCashOnly = async () => {
-    if (!recipient || !amount) return;
-    const senderIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
-    if (senderIdx === -1) {
-      addAlert("warning", "❗ The connected wallet is not a registered user wallet.");
-      return;
-    }
+const sendCashOnly = async () => {
+  if (!recipient || !amount) return;
 
+  const senderUserIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
+  const senderCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
+
+  if (senderUserIdx === -1 && senderCompanyIdx === -1) {
+    addAlert("warning", "❗ The connected wallet is not a registered user or company wallet.");
+    return;
+  }
+
+  if (senderUserIdx !== -1) {
+    // 유저가 보낸 경우
     setUserCashBalances((prev) => {
       const newCash = [...prev];
-      newCash[senderIdx] -= Number(amount);
-      const recipientIdx = userAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
-      if (recipientIdx !== -1) newCash[recipientIdx] += Number(amount);
+      newCash[senderUserIdx] -= Number(amount);
       return newCash;
     });
+  } else {
+    // 회사가 보낸 경우
+    setCompanyCashBalances((prev) => {
+      const newCash = [...prev];
+      newCash[senderCompanyIdx] -= Number(amount);
+      return newCash;
+    });
+  }
 
-    addAlert("success", `✅ Sent ${amount} cash only to ${getShortName(recipient)}`);
-    setRecipient("");
-    setAmount("");
-  };
+  const recipientUserIdx = userAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
+  if (recipientUserIdx !== -1) {
+    setUserCashBalances((prev) => {
+      const newCash = [...prev];
+      newCash[recipientUserIdx] += Number(amount);
+      return newCash;
+    });
+  } else {
+    const recipientCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
+    if (recipientCompanyIdx !== -1) {
+      setCompanyCashBalances((prev) => {
+        const newCash = [...prev];
+        newCash[recipientCompanyIdx] += Number(amount);
+        return newCash;
+      });
+    }
+  }
+
+  addAlert("success", `✅ Sent ${amount} cash only to ${getShortName(recipient)}`);
+  setRecipient("");
+  setAmount("");
+};
+
 
 useEffect(() => {
   if (contract) onFetchBalances();
