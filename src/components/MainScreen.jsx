@@ -46,7 +46,6 @@ function MainScreen({
 }) {
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
-
   useEffect(() => {
     const audio = new Audio("/sound/main.mp3");
     audio.volume = 0.3;
@@ -98,7 +97,8 @@ function MainScreen({
     }
   }, [alerts]);
 
-  const checkTransferRules = ({ inflowAmount, plannedOutflowAmount, senderBalance, transferAmount }) => {
+
+ const checkTransferRules = ({ inflowAmount, plannedOutflowAmount, senderBalance, transferAmount }) => {
   const warnings = [];
   if (plannedOutflowAmount > inflowAmount && inflowAmount > 0)
     warnings.push(`❗ Planned payout (${plannedOutflowAmount}) exceeds company inflow (${inflowAmount}).`);
@@ -112,42 +112,21 @@ function MainScreen({
   return warnings;
 };
 
+const handleDistributeWithCash = async () => {
+  await onDistribute();
+};
 
-  const handleDistributeWithCash = async () => {
-    await onDistribute();
-  };
+const aiAnalysis = () => {
+  addAlert("success", "AI Analysis executed");
+};
 
-  const aiAnalysis = () => {
-    addAlert("success", "AI Analysis executed");
-  };
-
-  const sendP2P = async () => {
+const sendP2P = async () => {
     if (!recipient || !amount) return;
-
-   const senderIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
-if (senderIdx === -1) {
-  addAlert("warning", "❗ The connected wallet is not a registered user wallet.");
-  return;
-}
-
-const senderBalance = userBalances[senderIdx];
-if (senderBalance === undefined) {
-  addAlert("warning", "❗ Unable to fetch user balance. Please try again.");
-  return;
-}
-
-
-    const totalCompanyInflow = companyBalances.reduce((acc, bal) => acc + bal, 0);
-    const totalUserOutflow = userBalances.reduce((acc, bal) => acc + bal, 0);
-
-    const warnings = checkTransferRules({
-      inflowAmount: totalCompanyInflow,
-      plannedOutflowAmount: totalUserOutflow,
-      senderBalance: senderBalance,
-      transferAmount: Number(amount)
-    });
-
-    warnings.forEach(w => addAlert("warning", w));
+    const senderIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
+    if (senderIdx === -1) {
+      addAlert("warning", "❗ The connected wallet is not a registered user wallet.");
+      return;
+    }
 
     try {
       const tx = await contract.transfer(recipient, Number(amount));
@@ -156,7 +135,9 @@ if (senderBalance === undefined) {
 
       setUserCashBalances((prev) => {
         const newCash = [...prev];
-        if (senderIdx !== -1) newCash[senderIdx] -= Number(amount);
+        newCash[senderIdx] -= Number(amount);
+        const recipientIdx = userAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
+        if (recipientIdx !== -1) newCash[recipientIdx] += Number(amount);
         return newCash;
       });
 
@@ -169,11 +150,32 @@ if (senderBalance === undefined) {
     }
   };
 
-  useEffect(() => {
-    if (contract) onFetchBalances();
-  }, [contract]);
+  const sendCashOnly = async () => {
+    if (!recipient || !amount) return;
+    const senderIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
+    if (senderIdx === -1) {
+      addAlert("warning", "❗ The connected wallet is not a registered user wallet.");
+      return;
+    }
 
- const handleCollectWithCheck = async () => {
+    setUserCashBalances((prev) => {
+      const newCash = [...prev];
+      newCash[senderIdx] -= Number(amount);
+      const recipientIdx = userAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
+      if (recipientIdx !== -1) newCash[recipientIdx] += Number(amount);
+      return newCash;
+    });
+
+    addAlert("success", `✅ Sent ${amount} cash only to ${getShortName(recipient)}`);
+    setRecipient("");
+    setAmount("");
+  };
+
+useEffect(() => {
+  if (contract) onFetchBalances();
+}, [contract]);
+
+const handleCollectWithCheck = async () => {
   await onCollect();
   await onFetchBalances();
 
@@ -186,72 +188,74 @@ if (senderBalance === undefined) {
   }
 };
 
-
   return (
-    <div className="page-wrapper">
-      <div className="alerts-box">
-        <h4>AI Analysis Alerts</h4>
-        <ul>
-          {alerts.map((a, idx) => (
-            <li key={idx} className={a.type}>{a.message}</li>
-          ))}
-        </ul>
-      </div>
+  <div className="page-wrapper">
+    <div className="alerts-box">
+      <h4>AI Analysis Alerts</h4>
+      <ul>
+        {alerts.map((a, idx) => (
+          <li key={idx} className={a.type}>{a.message}</li>
+        ))}
+      </ul>
+    </div>
 
-      <div className="main-container">
-        <div className="content-wrapper">
-          <h2>MetaPay Basic Income Simulator</h2>
-          <p><strong>National Wallet Balance:</strong> {nationalBalance}</p>
-          <p><strong>Distribution Count:</strong> {distributionCount} times</p>
+    <div className="main-container">
+      <div className="content-wrapper">
+        <h2>MetaPay Basic Income Simulator</h2>
+        <p><strong>National Wallet Balance:</strong> {nationalBalance}</p>
+        <p><strong>Distribution Count:</strong> {distributionCount} times</p>
 
-          <div className="button-group">
-            <button onClick={handleDistributeWithCash}>Distribute</button>
-            <button onClick={handleCollectWithCheck}>Collect</button>
-            <button onClick={onReset}>Reset</button>
-            <button onClick={onFetchBalances}>Check Balances</button>
-            <button onClick={aiAnalysis}>AI Analysis</button>
-          </div>
-
-          <div className="transaction-summary">
-            <h3>Current Transaction Summary</h3>
-            <p>💼 Total Company Inflow: {companyBalances.reduce((acc, bal) => acc + bal, 0)}</p>
-            <p>👤 Total User Distributed: {userBalances.reduce((acc, bal) => acc + bal, 0)}</p>
-          </div>
-
-          <div className="p2p-transfer">
-            <h3>P2P Transfer</h3>
-            <input type="text" value={recipient} placeholder="Recipient Address" onChange={(e) => setRecipient(e.target.value)} />
-            <input type="number" value={amount} placeholder="Amount" onChange={(e) => setAmount(e.target.value)} />
-            <button onClick={sendP2P}>Send</button>
-          </div>
-
-          <div className="user-list-grid">
-            {userBalances.map((bal, idx) => (
-              <UserBox
-                key={idx}
-                idx={idx}
-                userBalance={bal}
-                userCash={userCashBalances[idx]}
-                incomeAmount={incomeData[idx] || 0}
-                incomeShown={incomeData[idx] > 0}
-              />
-            ))}
-          </div>
-
-          <div className="company-list-grid">
-            {companyBalances.map((bal, idx) => (
-              <div key={idx} className="company-box">
-                <strong>Company{idx + 1}</strong><br />
-                🪙 MetaPay: {bal}<br />
-                💵 Cash: {companyCashBalances[idx]}
-              </div>
-            ))}
-          </div>
-
+        <div className="button-group">
+          <button onClick={handleDistributeWithCash}>Distribute</button>
+          <button onClick={handleCollectWithCheck}>Collect</button>
+          <button onClick={onReset}>Reset</button>
+          <button onClick={onFetchBalances}>Check Balances</button>
+          <button onClick={aiAnalysis}>AI Analysis</button>
         </div>
+
+        <div className="transaction-summary">
+          <h3>Current Transaction Summary</h3>
+          <p>💼 Total Company Inflow: {companyBalances.reduce((acc, bal) => acc + bal, 0)}</p>
+          <p>👤 Total User Distributed: {userBalances.reduce((acc, bal) => acc + bal, 0)}</p>
+        </div>
+
+        <div className="p2p-transfer">
+          <h3>P2P Transfer</h3>
+          <input type="text" value={recipient} placeholder="Recipient Address" onChange={(e) => setRecipient(e.target.value)} />
+          <input type="number" value={amount} placeholder="Amount" onChange={(e) => setAmount(e.target.value)} />
+          <div className="button-group">
+            <button onClick={sendP2P}>Send (MetaPay + Cash)</button>
+            <button onClick={sendCashOnly}>Send Cash Only</button>
+          </div>
+        </div>
+
+        <div className="user-list-grid">
+          {userBalances.map((bal, idx) => (
+            <UserBox
+              key={idx}
+              idx={idx}
+              userBalance={bal}
+              userCash={userCashBalances[idx]}
+              incomeAmount={incomeData[idx] || 0}
+              incomeShown={incomeData[idx] > 0}
+            />
+          ))}
+        </div>
+
+        <div className="company-list-grid">
+          {companyBalances.map((bal, idx) => (
+            <div key={idx} className="company-box">
+              <strong>Company{idx + 1}</strong><br />
+              🪙 MetaPay: {bal}<br />
+              💵 Cash: {companyCashBalances[idx]}
+            </div>
+          ))}
+        </div>
+
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 export default MainScreen;
