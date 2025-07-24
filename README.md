@@ -238,4 +238,4 @@ For licensing inquiries, contact: anioia33@gmail.com
 
 📧 anioia33@gmail.com  
 GitHub: [metapay-creator](https://github.com/metapay-creator)  
-Twitter: [@metapay_creator](https://x.com/metapay_creator)  
+Twitter: [@metapay_creator](https://x.com/metapay_creator)
