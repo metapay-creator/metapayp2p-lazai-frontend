@@ -21,8 +21,29 @@ function App() {
   const [nationalBalance, setNationalBalance] = useState(0);
   const [distributionCount, setDistributionCount] = useState(0);
 
-  // ✅ 거래내역 상태
   const [transactions, setTransactions] = useState([]);
+
+  // ✅ 국가 및 사용자/회사 주소 정의
+  const nationalWalletAddress = "0xD7ACd2a9FD159E69Bb102A1ca21C9a3e3A5F771B";
+  const userAddresses = [
+    "0xcAEc83c59b3FbfE65cC73828e9c89b9c07902105",
+    "0x3C39f84a28673bdbA9f19eaAd26e04d95795260C",
+    "0x9D2b9Acad30E1D2a0bb81e96816506C166F2076A",
+    "0x37f047f304B49cE83b5630BCb1D6DF4b05eeD305",
+    "0x4194b9E02e733f112b2b44f40554DAB0EA60b470",
+    "0xc95132B717cFCac125423e07429e8894D18c357B",
+    "0xA0831b8e8628b2C683cd98Fd17020d2376582073",
+    "0x5317F13e44d02E44c899010D4Fb11985657c26D8",
+    "0x4f4728FA3FF45b5459Bfb64C5CD0D78FaEBe12f6",
+    "0xA80E21304603C453f416bE77b210ED0AFf400ed7"
+  ];
+  const companyAddresses = [
+    "0x235a5a253873e1DfDE4AB970C3C8bBDB4A962b5b",
+    "0x65077De588c690D2BAA9c83B783E378445B69C18",
+    "0x8266893251a5CEa9b88701044aa5D8b1D1a9C64f",
+    "0xb18BAdd5FeBe08489c7F0aFc54c77e55133360ce",
+    "0x527F433024e646e44d479D4396D53B5544D88D84"
+  ];
 
   const connectWallet = async () => {
     if (window.ethereum) {
@@ -55,45 +76,44 @@ function App() {
   }, []);
 
   const handleDistribute = async () => {
-  if (!contract) return;
-  try {
-    const tx = await contract.distribute();
-    await tx.wait();
+    if (!contract) return false;
+    try {
+      const tx = await contract.distribute();
+      await tx.wait();
 
-    // 현금도 함께 분배
-    setUserCashBalances(prev => prev.map(cash => cash + 300));
-    setCompanyCashBalances(prev => prev.map(cash => cash + 300));
-    await fetchBalances();
+      setUserCashBalances(prev => prev.map(cash => cash + 300));
+      setCompanyCashBalances(prev => prev.map(cash => cash + 300));
+      await fetchBalances();
 
-    setDistributionCount(prev => prev + 1);
-    setAlerts(prev => [...prev, { type: "success", message: "✅ Distribution success" }]);
+      setDistributionCount(prev => prev + 1);
+      setAlerts(prev => [...prev, { type: "success", message: "✅ Distribution success" }]);
 
-    // 거래 내역 추가 (AI 분석에 포함되도록)
-    const timestamp = Date.now();
-    const newTxs = [
-      ...userAddresses.map(addr => ({
-        from: nationalWalletAddress,
-        to: addr,
-        amount: 500,
-        cashAmount: 500,
-        timestamp
-      })),
-      ...companyAddresses.map(addr => ({
-        from: nationalWalletAddress,
-        to: addr,
-        amount: 500,
-        cashAmount: 500,
-        timestamp
-      }))
-    ];
-    setTransactions(prev => [...prev, ...newTxs]);
+      const timestamp = Date.now();
+      const newTxs = [
+        ...userAddresses.map(addr => ({
+          from: nationalWalletAddress,
+          to: addr,
+          amount: 500,
+          cashAmount: 500,
+          timestamp
+        })),
+        ...companyAddresses.map(addr => ({
+          from: nationalWalletAddress,
+          to: addr,
+          amount: 500,
+          cashAmount: 500,
+          timestamp
+        }))
+      ];
+      setTransactions(prev => [...prev, ...newTxs]);
 
-  } catch (err) {
-    console.error("Distribute Error:", err);
-    setAlerts(prev => [...prev, { type: "error", message: "❌ Distribution failed" }]);
-  }
-};
-
+      return true;
+    } catch (err) {
+      console.error("Distribute Error:", err);
+      setAlerts(prev => [...prev, { type: "error", message: "❌ Distribution failed" }]);
+      return false;
+    }
+  };
 
   const handleCollect = async () => {
     if (!contract) return;
@@ -118,7 +138,7 @@ function App() {
       setUserCashBalances([100000, 50000, 50000, 10000, 5000, 20000, 8000, 9000, 500, 300]);
       setCompanyCashBalances([500000, 300000, 100000, 50000, 10000]);
       setDistributionCount(0);
-      setTransactions([]);  // 💡 거래내역 초기화도 함께
+      setTransactions([]);
     } catch (err) {
       console.error("Reset Error:", err);
       setAlerts(prev => [...prev, { type: "error", message: "❌ Reset failed" }]);
@@ -160,7 +180,6 @@ function App() {
           distributionCount={distributionCount}
           setUserCashBalances={setUserCashBalances}
           setCompanyCashBalances={setCompanyCashBalances}
-          // ✅ 거래내역 props 전달
           transactions={transactions}
           setTransactions={setTransactions}
         />
