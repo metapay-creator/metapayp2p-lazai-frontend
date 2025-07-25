@@ -257,3 +257,39 @@ For licensing inquiries, contact: anioia33@gmail.com
 📧 anioia33@gmail.com  
 GitHub: [metapay-creator](https://github.com/metapay-creator)  
 Twitter: [@metapay_creator](https://x.com/metapay_creator)
+---
+
+## 🌍 [FOR WCHL — World Chain Hackathon League]
+
+MetaPayP2P is currently under evaluation in the **World Chain Hackathon League (WCHL)**,  
+representing the **ICP HUB Canada & US** in the **North American region**.
+
+This project demonstrates a policy-oriented, AI-enhanced simulation of a sustainable circulating basic income, powered by smart contracts.
+
+We are honored to be part of the global Web3 innovation ecosystem, and we look forward to the next round in the North America selection stage.
+
+🔗 [GitHub Repo](https://github.com/metapay-creator/MetaPayP2P-Clean)  
+🔗 [Testnet DApp](https://meta-pay-p2-p-clean-7aig.vercel.app)
+
+---
+
+## 🪐 [FOR METIS — Hyperion Hackathon]
+
+This project is also being submitted to the **Metis Hyperion Hackathon**.
+
+MetaPayP2P offers a novel approach to public finance simulation within DAO ecosystems, showcasing how smart contracts and AI can enable autonomous, transparent basic income distribution across a decentralized society.
+
+This version emphasizes on-chain interaction, AI risk detection, and DAO-compatible fund flows — aligned with Metis' Layer 2 mission.
+
+---
+
+## 🤖 [FOR SEI — AI Accelathon]
+
+MetaPayP2P is also an entry in the **Sei AI Accelathon**, where we highlight AI-enhanced economic analysis, smart contract automation, and dynamic behavior modeling.
+
+The project features:
+- On-chain basic income cycles
+- AI-driven transaction logic (OpenAI API + Alith AI)
+- Real-time risk alerts and simulation dashboard
+
+We are excited to bring the MetaPay simulation to Sei’s AI-powered ecosystem and explore MCP/agent-based integrations in future iterations.
