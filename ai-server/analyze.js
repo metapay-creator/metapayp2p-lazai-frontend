@@ -1,11 +1,13 @@
-const { OpenAI } = require("openai");
-require("dotenv").config();
+import OpenAI from "openai";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function analyzeData(users, transactions) {
+export async function analyzeData(users, transactions) {
   try {
     const userSummary = users
       .map((u) => `${u.label} (${u.address.slice(0, 6)}...): ${u.balance} units`)
@@ -45,5 +47,3 @@ ${txSummary}
     return "AI analysis failed.";
   }
 }
-
-module.exports = { analyzeData };

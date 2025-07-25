@@ -6,6 +6,9 @@ import { analyzeData } from "./analyze.js";
 // ✅ 환경변수 로드
 dotenv.config();
 
+// ✅ API 키 콘솔 확인
+console.log("✅ OPENAI KEY:", process.env.OPENAI_API_KEY);
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -35,12 +38,10 @@ app.post("/api/analyze", async (req, res) => {
     const to = tx.to;
     const amount = Number(tx.amount);
 
-    // 회사 수신액
     if (to.includes("Company")) {
       inflowMap[to] = (inflowMap[to] || 0) + amount;
     }
 
-    // 회사 송금액
     if (from.includes("Company")) {
       sentMap[from] = (sentMap[from] || 0) + amount;
     }
