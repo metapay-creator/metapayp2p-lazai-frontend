@@ -114,11 +114,11 @@ function MainScreen({
   };
 
   const handleDistributeWithCash = async () => {
-  const success = await onDistribute();
-  if (!success) {
-    addAlert("error", "❌ Distribution failed (MainScreen)");
-  }
-};
+    const success = await onDistribute();
+    if (!success) {
+      addAlert("error", "❌ Distribution failed (MainScreen)");
+    }
+  };
 
   const aiAnalysis = async () => {
     try {
