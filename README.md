@@ -293,3 +293,6 @@ The project features:
 - Real-time risk alerts and simulation dashboard
 
 We are excited to bring the MetaPay simulation to Sei’s AI-powered ecosystem and explore MCP/agent-based integrations in future iterations.
+
+📄 Also submitted to the **NLnet Foundation** as part of its Open Source Support initiative for sustainable digital public infrastructure.
+
