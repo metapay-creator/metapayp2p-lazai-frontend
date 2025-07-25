@@ -21,6 +21,9 @@ function App() {
   const [nationalBalance, setNationalBalance] = useState(0);
   const [distributionCount, setDistributionCount] = useState(0);
 
+  // ✅ 거래내역 상태
+  const [transactions, setTransactions] = useState([]);
+
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
@@ -52,22 +55,45 @@ function App() {
   }, []);
 
   const handleDistribute = async () => {
-    if (!contract) return;
-    try {
-      const tx = await contract.distribute();
-      await tx.wait();
+  if (!contract) return;
+  try {
+    const tx = await contract.distribute();
+    await tx.wait();
 
-      setUserCashBalances(prev => prev.map(cash => cash + 300));
-      setCompanyCashBalances(prev => prev.map(cash => cash + 300));
-      await fetchBalances();
+    // 현금도 함께 분배
+    setUserCashBalances(prev => prev.map(cash => cash + 300));
+    setCompanyCashBalances(prev => prev.map(cash => cash + 300));
+    await fetchBalances();
 
-      setDistributionCount(prev => prev + 1);
-      setAlerts(prev => [...prev, { type: "success", message: "✅ Distribution success" }]);
-    } catch (err) {
-      console.error("Distribute Error:", err);
-      setAlerts(prev => [...prev, { type: "error", message: "❌ Distribution failed" }]);
-    }
-  };
+    setDistributionCount(prev => prev + 1);
+    setAlerts(prev => [...prev, { type: "success", message: "✅ Distribution success" }]);
+
+    // 거래 내역 추가 (AI 분석에 포함되도록)
+    const timestamp = Date.now();
+    const newTxs = [
+      ...userAddresses.map(addr => ({
+        from: nationalWalletAddress,
+        to: addr,
+        amount: 500,
+        cashAmount: 500,
+        timestamp
+      })),
+      ...companyAddresses.map(addr => ({
+        from: nationalWalletAddress,
+        to: addr,
+        amount: 500,
+        cashAmount: 500,
+        timestamp
+      }))
+    ];
+    setTransactions(prev => [...prev, ...newTxs]);
+
+  } catch (err) {
+    console.error("Distribute Error:", err);
+    setAlerts(prev => [...prev, { type: "error", message: "❌ Distribution failed" }]);
+  }
+};
+
 
   const handleCollect = async () => {
     if (!contract) return;
@@ -92,6 +118,7 @@ function App() {
       setUserCashBalances([100000, 50000, 50000, 10000, 5000, 20000, 8000, 9000, 500, 300]);
       setCompanyCashBalances([500000, 300000, 100000, 50000, 10000]);
       setDistributionCount(0);
+      setTransactions([]);  // 💡 거래내역 초기화도 함께
     } catch (err) {
       console.error("Reset Error:", err);
       setAlerts(prev => [...prev, { type: "error", message: "❌ Reset failed" }]);
@@ -133,6 +160,9 @@ function App() {
           distributionCount={distributionCount}
           setUserCashBalances={setUserCashBalances}
           setCompanyCashBalances={setCompanyCashBalances}
+          // ✅ 거래내역 props 전달
+          transactions={transactions}
+          setTransactions={setTransactions}
         />
       ) : (
         <WelcomeScreen onConnect={connectWallet} />

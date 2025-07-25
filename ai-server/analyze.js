@@ -17,6 +17,13 @@ async function analyzeData(users, transactions) {
 
     const prompt = `
 You are an AI economic analyst in a blockchain simulation.
+
+Please note:
+- Each user has an initial balance.
+- The current balances are **after** some transactions.
+- Do NOT assume current balance minus sent amount must be negative. Users are not allowed to have negative balances.
+- Just observe patterns, frequent senders or receivers, zero-value transactions, and signs of inequality or special behavior.
+
 Analyze the following data and return key insights in bullet points.
 
 Wallets:
@@ -24,7 +31,7 @@ ${userSummary}
 
 Transactions:
 ${txSummary}
-    `;
+`;
 
     const chat = await openai.chat.completions.create({
       model: "gpt-4",
@@ -35,7 +42,7 @@ ${txSummary}
     return chat.choices[0].message.content;
   } catch (err) {
     console.error("AI error:", err.message);
-    return "AI analysis failed."; // 반드시 string 반환
+    return "AI analysis failed.";
   }
 }
 

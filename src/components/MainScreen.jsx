@@ -42,7 +42,9 @@ function MainScreen({
   onFetchBalances,
   distributionCount,
   setUserCashBalances,
-  setCompanyCashBalances
+  setCompanyCashBalances,
+  transactions,
+  setTransactions
 }) {
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
@@ -97,158 +99,215 @@ function MainScreen({
     }
   }, [alerts]);
 
+  const checkTransferRules = ({ inflowAmount, plannedOutflowAmount, senderBalance, transferAmount }) => {
+    const warnings = [];
+    if (plannedOutflowAmount > inflowAmount && inflowAmount > 0)
+      warnings.push(`❗ Planned payout (${plannedOutflowAmount}) exceeds company inflow (${inflowAmount}).`);
 
- const checkTransferRules = ({ inflowAmount, plannedOutflowAmount, senderBalance, transferAmount }) => {
-  const warnings = [];
-  if (plannedOutflowAmount > inflowAmount && inflowAmount > 0)
-    warnings.push(`❗ Planned payout (${plannedOutflowAmount}) exceeds company inflow (${inflowAmount}).`);
+    if (typeof senderBalance === 'number' && senderBalance === 0)
+      warnings.push("❗ Current MetaPay balance is 0. Transfer is possible but may be risky.");
 
-  if (typeof senderBalance === 'number' && senderBalance === 0)
-    warnings.push("❗ Current MetaPay balance is 0. Transfer is possible but may be risky.");
+    if (senderBalance > 0 && transferAmount > senderBalance * 0.5)
+      warnings.push(`⚠️ You are trying to transfer more than 50% of your MetaPay balance (${(senderBalance * 0.5).toFixed(2)}).`);
 
-  if (senderBalance > 0 && transferAmount > senderBalance * 0.5)
-    warnings.push(`⚠️ You are trying to transfer more than 50% of your MetaPay balance (${(senderBalance * 0.5).toFixed(2)}).`);
+    return warnings;
+  };
 
-  return warnings;
-};
+  const handleDistributeWithCash = async () => {
+    await onDistribute();
+  };
 
-const handleDistributeWithCash = async () => {
-  await onDistribute();
-};
+  const aiAnalysis = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          users: [
+            ...userAddresses.map((addr, idx) => ({
+              label: `User${idx + 1}`,
+              address: addr,
+              balance: userBalances[idx],
+            })),
+            ...companyAddresses.map((addr, idx) => ({
+              label: `Company${idx + 1}`,
+              address: addr,
+              balance: companyBalances[idx],
+            }))
+          ],
+          transactions: transactions
+        }),
+      });
 
-const aiAnalysis = () => {
-  addAlert("success", "AI Analysis executed");
-};
+      const data = await response.json();
 
-const sendP2P = async () => {
-  if (!recipient || !amount) return;
-  const senderIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
-  const senderCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
+      if (data.alerts && Array.isArray(data.alerts)) {
+        data.alerts.forEach((alert) => {
+          addAlert(alert.type || "info", alert.message);
+        });
+      }
 
-  if (senderIdx === -1 && senderCompanyIdx === -1) {
-    addAlert("warning", "❗ The connected wallet is not a registered user or company wallet.");
-    return;
-  }
+      if (data.aiResult) {
+        addAlert("success", "🧠 AI 분석 결과:");
+        data.aiResult.split("\n").forEach((line) => {
+          if (line.trim() !== "") {
+            addAlert("info", line.trim());
+          }
+        });
+      }
+    } catch (err) {
+      console.error("AI 분석 오류:", err);
+      addAlert("error", "❌ AI 분석 실패");
+    }
+  };
 
-  try {
-    const tx = await contract.transfer(recipient, Number(amount));
-    await tx.wait();
-    onFetchBalances();
+  const sendP2P = async () => {
+    if (!recipient || !amount) return;
+    const senderIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
+    const senderCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
 
-    // Cash Handling
-    if (senderIdx !== -1) {
-      setUserCashBalances(prev => {
+    if (senderIdx === -1 && senderCompanyIdx === -1) {
+      addAlert("warning", "❗ The connected wallet is not a registered user or company wallet.");
+      return;
+    }
+
+    try {
+      const tx = await contract.transfer(recipient, Number(amount));
+      await tx.wait();
+      onFetchBalances();
+
+      if (senderIdx !== -1) {
+        setUserCashBalances(prev => {
+          const newCash = [...prev];
+          newCash[senderIdx] -= Number(amount);
+          return newCash;
+        });
+      } else if (senderCompanyIdx !== -1) {
+        setCompanyCashBalances(prev => {
+          const newCash = [...prev];
+          newCash[senderCompanyIdx] -= Number(amount);
+          return newCash;
+        });
+      }
+
+      const recipientIdx = userAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
+      const recipientCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
+
+      if (recipientIdx !== -1) {
+        setUserCashBalances(prev => {
+          const newCash = [...prev];
+          newCash[recipientIdx] += Number(amount);
+          return newCash;
+        });
+      } else if (recipientCompanyIdx !== -1) {
+        setCompanyCashBalances(prev => {
+          const newCash = [...prev];
+          newCash[recipientCompanyIdx] += Number(amount);
+          return newCash;
+        });
+      }
+
+      setTransactions(prev => [
+        ...prev,
+        {
+          from: connectedWallet,
+          to: recipient,
+          amount: Number(amount),
+          cashAmount: Number(amount),
+          type: "MetaPay+Cash",
+          timestamp: new Date().toISOString()
+        }
+      ]);
+
+      addAlert("success", `✅ Sent ${amount} to ${getShortName(recipient)}`);
+      setRecipient("");
+      setAmount("");
+    } catch (err) {
+      console.error("P2P Transfer Error", err);
+      addAlert("error", "❌ P2P Transfer failed");
+    }
+  };
+
+  const sendCashOnly = async () => {
+    if (!recipient || !amount) return;
+
+    const senderUserIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
+    const senderCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
+
+    if (senderUserIdx === -1 && senderCompanyIdx === -1) {
+      addAlert("warning", "❗ The connected wallet is not a registered user or company wallet.");
+      return;
+    }
+
+    if (senderUserIdx !== -1) {
+      setUserCashBalances((prev) => {
         const newCash = [...prev];
-        newCash[senderIdx] -= Number(amount);
+        newCash[senderUserIdx] -= Number(amount);
         return newCash;
       });
-    } else if (senderCompanyIdx !== -1) {
-      setCompanyCashBalances(prev => {
+    } else {
+      setCompanyCashBalances((prev) => {
         const newCash = [...prev];
         newCash[senderCompanyIdx] -= Number(amount);
         return newCash;
       });
     }
 
-    const recipientIdx = userAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
-    const recipientCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
-
-    if (recipientIdx !== -1) {
-      setUserCashBalances(prev => {
+    const recipientUserIdx = userAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
+    if (recipientUserIdx !== -1) {
+      setUserCashBalances((prev) => {
         const newCash = [...prev];
-        newCash[recipientIdx] += Number(amount);
+        newCash[recipientUserIdx] += Number(amount);
         return newCash;
       });
-    } else if (recipientCompanyIdx !== -1) {
-      setCompanyCashBalances(prev => {
-        const newCash = [...prev];
-        newCash[recipientCompanyIdx] += Number(amount);
-        return newCash;
-      });
+    } else {
+      const recipientCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
+      if (recipientCompanyIdx !== -1) {
+        setCompanyCashBalances((prev) => {
+          const newCash = [...prev];
+          newCash[recipientCompanyIdx] += Number(amount);
+          return newCash;
+        });
+      }
     }
 
-    addAlert("success", `✅ Sent ${amount} to ${getShortName(recipient)}`);
+    setTransactions(prev => [
+      ...prev,
+      {
+        from: connectedWallet,
+        to: recipient,
+        amount: 0,
+        cashAmount: Number(amount),
+        type: "CashOnly",
+        timestamp: new Date().toISOString()
+      }
+    ]);
+
+    addAlert("success", `✅ Sent ${amount} cash only to ${getShortName(recipient)}`);
     setRecipient("");
     setAmount("");
-  } catch (err) {
-    console.error("P2P Transfer Error", err);
-    addAlert("error", "❌ P2P Transfer failed");
-  }
-};
+  };
 
+  useEffect(() => {
+    if (contract) onFetchBalances();
+  }, [contract]);
 
-const sendCashOnly = async () => {
-  if (!recipient || !amount) return;
+  const handleCollectWithCheck = async () => {
+    await onCollect();
+    await onFetchBalances();
 
-  const senderUserIdx = userAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
-  const senderCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === connectedWallet.toLowerCase());
+    const expectedTotal = 5000 * distributionCount;
+    const actualTotal = nationalBalance;
 
-  if (senderUserIdx === -1 && senderCompanyIdx === -1) {
-    addAlert("warning", "❗ The connected wallet is not a registered user or company wallet.");
-    return;
-  }
-
-  if (senderUserIdx !== -1) {
-    // 유저가 보낸 경우
-    setUserCashBalances((prev) => {
-      const newCash = [...prev];
-      newCash[senderUserIdx] -= Number(amount);
-      return newCash;
-    });
-  } else {
-    // 회사가 보낸 경우
-    setCompanyCashBalances((prev) => {
-      const newCash = [...prev];
-      newCash[senderCompanyIdx] -= Number(amount);
-      return newCash;
-    });
-  }
-
-  const recipientUserIdx = userAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
-  if (recipientUserIdx !== -1) {
-    setUserCashBalances((prev) => {
-      const newCash = [...prev];
-      newCash[recipientUserIdx] += Number(amount);
-      return newCash;
-    });
-  } else {
-    const recipientCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
-    if (recipientCompanyIdx !== -1) {
-      setCompanyCashBalances((prev) => {
-        const newCash = [...prev];
-        newCash[recipientCompanyIdx] += Number(amount);
-        return newCash;
-      });
+    if (actualTotal < expectedTotal) {
+      const diff = expectedTotal - actualTotal;
+      addAlert("warning", `⚖️ Total collected amount should be ${expectedTotal}. Please send ${diff} MetaPay manually from the admin wallet.`);
     }
-  }
+  };
 
-  addAlert("success", `✅ Sent ${amount} cash only to ${getShortName(recipient)}`);
-  setRecipient("");
-  setAmount("");
-};
-
-
-
-useEffect(() => {
-  if (contract) onFetchBalances();
-}, [contract]);
-
-const handleCollectWithCheck = async () => {
-  await onCollect();
-  await onFetchBalances();
-
-  const expectedTotal = 5000 * distributionCount;
-  const actualTotal = nationalBalance;
-
-  if (actualTotal < expectedTotal) {
-    const diff = expectedTotal - actualTotal;
-    addAlert("warning", `⚖️ Total collected amount should be ${expectedTotal}. Please send ${diff} MetaPay manually from the admin wallet.`);
-  }
-};
-
-  return (
+   return (
   <div className="page-wrapper">
-    <div className="alerts-box">
+    <div className="alerts-box" style={{ maxHeight: '600px', overflowY: 'auto' }}>
       <h4>AI Analysis Alerts</h4>
       <ul>
         {alerts.map((a, idx) => (
@@ -309,11 +368,24 @@ const handleCollectWithCheck = async () => {
             </div>
           ))}
         </div>
-
       </div>
+    </div>
+
+    <div className="transaction-box" style={{ position: 'absolute', top: '20px', right: '40px', backgroundColor: 'white', color: 'black', padding: '12px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)', maxHeight: '600px', overflowY: 'auto', width: '300px' }}>
+      <h4>📎 Transaction History</h4>
+      <ul>
+        {transactions.slice(-30).map((tx, idx) => (
+          <li key={idx} style={{ marginBottom: '12px' }}>
+            {getShortName(tx.from)} → {getShortName(tx.to)}:<br />
+            💰 {tx.amount} MetaPay / 💵 {tx.cashAmount} Cash<br />
+            🕒 {new Date(tx.timestamp).toLocaleString()}
+          </li>
+        ))}
+      </ul>
     </div>
   </div>
 );
 }
+
 
 export default MainScreen;
