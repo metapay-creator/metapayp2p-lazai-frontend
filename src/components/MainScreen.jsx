@@ -120,7 +120,8 @@ function MainScreen({
     }
   };
 
- onst aiAnalysis = async () => {
+const aiAnalysis = async () => {
+
   try {
     const response = await fetch("https://metapay-openai-backend.onrender.com/api/analyze", {
       method: "POST",
@@ -142,26 +143,29 @@ function MainScreen({
       }),
     });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (data.alerts && Array.isArray(data.alerts)) {
-        data.alerts.forEach((alert) => {
-          addAlert(alert.type || "info", alert.message);
-        });
-      }
-
-      if (data.aiResult) {
-  addAlert("success", "🧠 AI Analysis Result:");
-  data.aiResult.split("\n").forEach((line) => {
-    if (line.trim() !== "") {
-      addAlert("info", line.trim());
+    if (data.alerts && Array.isArray(data.alerts)) {
+      data.alerts.forEach((alert) => {
+        addAlert(alert.type || "info", alert.message);
+      });
     }
-  });
-}
-} catch (err) {
-  console.error("AI analysis error:", err);
-  addAlert("error", "❌ AI Analysis Failed");
-}
+
+    if (data.aiResult) {
+      addAlert("success", "🧠 AI Analysis Result:");
+      data.aiResult.split("\n").forEach((line) => {
+        if (line.trim() !== "") {
+          addAlert("info", line.trim());
+        }
+      });
+    }
+
+  } catch (err) {
+    console.error("AI analysis error:", err);
+    addAlert("error", "❌ AI Analysis Failed");
+  }
+};
+
 
 
   const sendP2P = async () => {
