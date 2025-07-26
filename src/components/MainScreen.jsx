@@ -151,18 +151,18 @@ function MainScreen({
       }
 
       if (data.aiResult) {
-        addAlert("success", "🧠 AI 분석 결과:");
-        data.aiResult.split("\n").forEach((line) => {
-          if (line.trim() !== "") {
-            addAlert("info", line.trim());
-          }
-        });
-      }
-    } catch (err) {
-      console.error("AI 분석 오류:", err);
-      addAlert("error", "❌ AI 분석 실패");
+  addAlert("success", "🧠 AI Analysis Result:");
+  data.aiResult.split("\n").forEach((line) => {
+    if (line.trim() !== "") {
+      addAlert("info", line.trim());
     }
-  };
+  });
+}
+} catch (err) {
+  console.error("AI analysis error:", err);
+  addAlert("error", "❌ AI Analysis Failed");
+}
+
 
   const sendP2P = async () => {
     if (!recipient || !amount) return;
