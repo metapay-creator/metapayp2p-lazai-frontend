@@ -120,27 +120,27 @@ function MainScreen({
     }
   };
 
-  const aiAnalysis = async () => {
-    try {
-      const response = await fetch("http://localhost:3001/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          users: [
-            ...userAddresses.map((addr, idx) => ({
-              label: `User${idx + 1}`,
-              address: addr,
-              balance: userBalances[idx],
-            })),
-            ...companyAddresses.map((addr, idx) => ({
-              label: `Company${idx + 1}`,
-              address: addr,
-              balance: companyBalances[idx],
-            }))
-          ],
-          transactions: transactions
-        }),
-      });
+ onst aiAnalysis = async () => {
+  try {
+    const response = await fetch("https://metapay-openai-backend.onrender.com/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        users: [
+          ...userAddresses.map((addr, idx) => ({
+            label: `User${idx + 1}`,
+            address: addr,
+            balance: userBalances[idx],
+          })),
+          ...companyAddresses.map((addr, idx) => ({
+            label: `Company${idx + 1}`,
+            address: addr,
+            balance: companyBalances[idx],
+          }))
+        ],
+        transactions: transactions
+      }),
+    });
 
       const data = await response.json();
 
