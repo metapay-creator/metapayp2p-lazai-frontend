@@ -294,5 +294,15 @@ The project features:
 
 We are excited to bring the MetaPay simulation to Sei’s AI-powered ecosystem and explore MCP/agent-based integrations in future iterations.
 
-📄 Also submitted to the **NLnet Foundation** as part of its Open Source Support initiative for sustainable digital public infrastructure.
+## 🏛️ [FOR NLNET — Open Source Support Application]
+
+This project has also been submitted to the **NLnet Foundation** as part of its Open Source and Public Digital Infrastructure Initiative.
+
+MetaPayP2P addresses economic imbalance at scale through a government-grade circulating basic income model. While not intended for individual use, it is designed for **policy simulation and national-level pilot experiments**.
+
+The system is:
+- Fully open source
+- Operates with smart contract automation
+- Integrated with AI for governance and risk alerts
+- Designed for long-term public experimentation
 
