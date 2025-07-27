@@ -300,17 +300,19 @@ const aiAnalysis = async () => {
   }, [contract]);
 
   const handleCollectWithCheck = async () => {
-    await onCollect();
-    await onFetchBalances();
+  await onCollect();
+  await onFetchBalances();
 
-    const expectedTotal = 5000 * distributionCount;
-    const actualTotal = nationalBalance;
+  const totalUserBalance = users.reduce((sum, user) => sum + user.balance, 0);
+  const expectedTotal = Math.floor(totalUserBalance * 0.1);
+  const actualTotal = nationalBalance;
 
-    if (actualTotal < expectedTotal) {
-      const diff = expectedTotal - actualTotal;
-      addAlert("warning", `⚖️ Total collected amount should be ${expectedTotal}. Please send ${diff} MetaPay manually from the admin wallet.`);
-    }
-  };
+  if (actualTotal < expectedTotal) {
+    const diff = expectedTotal - actualTotal;
+    addAlert("warning", `⚖️ Total collected amount should be ${expectedTotal}. Please send ${diff} MetaPay manually from the admin wallet.`);
+  }
+};
+
 
    return (
   <div className="page-wrapper">
