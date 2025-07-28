@@ -136,7 +136,7 @@ function MainScreen(props) {
 const aiAnalysis = async () => {
 
   try {
-    const response = await fetch("https://metapay-openai-backend.onrender.com/api/analyze", {
+   const response = await fetch(import.meta.env.VITE_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
