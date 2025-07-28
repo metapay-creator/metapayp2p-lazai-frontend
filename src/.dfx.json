@@ -1,0 +1,8 @@
+{
+  "canisters": {},
+  "defaults": {
+    "build": "",
+    "root": "src"
+  },
+  "version": 1
+}
