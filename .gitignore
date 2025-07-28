@@ -1,4 +1,4 @@
-# Logs
+# ───── 📁 Logs ─────
 logs/
 *.log
 npm-debug.log*
@@ -7,18 +7,24 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Dependency directories
+# ───── 📦 Dependency directories ─────
 node_modules/
+
+# ───── 📦 Build output ─────
 dist/
 dist-ssr/
 .vite/
+.vercel/
 
-# Environment files
+# ───── 🔐 Environment variables ─────
 .env
 .env.local
 .env.production
+.env.development
+.env.test
+.env.*.local
 
-# Editor settings
+# ───── 💻 Editor settings ─────
 .vscode/
 !.vscode/extensions.json
 .idea/
@@ -29,5 +35,13 @@ dist-ssr/
 *.sln
 *.sw?
 
-# Deployment & Platform
-.vercel/
+# ───── ⚠️ Optional OS/System files ─────
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ───── 🔒 Optional lock files ─────
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
