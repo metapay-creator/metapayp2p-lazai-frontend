@@ -6,6 +6,12 @@ body {
   padding: 0;
 }
 
+@keyframes bounceHighlight {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
 .page-wrapper {
   display: flex;
   flex-direction: row;
@@ -34,6 +40,11 @@ body {
   margin: 0;
 }
 
+.alerts-box li.info { color: #0ea5e9; }
+.alerts-box li.success { color: #22c55e; }
+.alerts-box li.warning { color: #facc15; }
+.alerts-box li.error { color: #ef4444; }
+
 .main-container {
   display: flex;
   flex-direction: column;
@@ -50,14 +61,15 @@ body {
 .button-group button {
   margin: 5px;
   padding: 8px 16px;
-  background-color: #facc15;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  background-color: #facc15;
+  color: black;
 }
 
 .button-group button:hover {
-  background-color: #fbbf24;
+  background-color: #eab308;
 }
 
 .user-list-grid {
@@ -92,6 +104,15 @@ body {
   align-items: center;
   text-align: center;
   line-height: 1.6;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.user-box.selected,
+.company-box.selected {
+  border: 2px solid #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
+  animation: bounceHighlight 0.4s ease;
 }
 
 .user-box p,
@@ -102,19 +123,49 @@ body {
   gap: 5px;
 }
 
+.user-box p:nth-of-type(2),
+.company-box p:nth-of-type(3) {
+  color: #3b82f6; /* Cash */
+}
+
+.user-box p:nth-of-type(3),
+.company-box p:nth-of-type(2) {
+  color: #f59e0b; /* MetaPay */
+}
+
 .user-box strong {
   margin-bottom: 6px;
   font-size: 0.95rem;
 }
 
+.p2p-transfer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0;
+}
+
 .p2p-transfer input {
-  margin: 5px;
   padding: 5px;
+  width: 240px;
+  font-size: 0.9rem;
 }
 
 .p2p-transfer button {
   margin: 5px;
   padding: 5px 10px;
+  background-color: #facc15;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.p2p-transfer button:hover {
+  background-color: #eab308;
 }
 
 .transaction-log {

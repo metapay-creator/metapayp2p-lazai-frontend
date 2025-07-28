@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./MainScreen.css";
 
-function UserBox({ idx, userBalance, userCash, incomeAmount, incomeShown }) {
+function UserBox({ idx, userBalance, userCash, incomeAmount, incomeShown, address, onSelect }) {
   const [displayedCash, setDisplayedCash] = useState(userCash);
   const [showIncome, setShowIncome] = useState(false);
 
@@ -16,44 +16,57 @@ function UserBox({ idx, userBalance, userCash, incomeAmount, incomeShown }) {
   }, [incomeShown]);
 
   return (
-    <div className="user-box">
+    <div className="user-box" onClick={() => onSelect(address)} style={{ cursor: "pointer" }}>
       <strong>User{idx + 1}</strong><br />
       {showIncome && <div className="income-text">+${incomeAmount.toLocaleString()} 💵</div>}
-      <p>💵 Cash: ${displayedCash.toLocaleString()}</p>
-      <p>🪙 MetaPay: {userBalance}</p>
+     <p className="cash-line">💵 Cash: ${displayedCash.toLocaleString()}</p>
+     <p className="metapay-line">🪙 MetaPay: {userBalance}</p>
+
     </div>
   );
 }
 
-function MainScreen({
-  connectedWallet,
-  contract,
-  alerts,
-  setAlerts,
-  userBalances,
-  userCashBalances,
-  companyBalances,
-  companyCashBalances,
-  incomeData,
-  nationalBalance,
-  onDistribute,
-  onCollect,
-  onReset,
-  onFetchBalances,
-  distributionCount,
-  setUserCashBalances,
-  setCompanyCashBalances,
-  transactions,
-  setTransactions
-}) {
+function CompanyBox({ idx, balance, cash, address, onSelect }) {
+  return (
+    <div className="company-box" onClick={() => onSelect(address)} style={{ cursor: "pointer" }}>
+      <strong>Company{idx + 1}</strong><br />
+      <p className="metapay-line">🪙 MetaPay: {balance}</p>
+      <p className="cash-line">💵 Cash: {cash}</p>
+    </div>
+  );
+}
+
+function MainScreen(props) {
+  const {
+    connectedWallet,
+    contract,
+    alerts,
+    setAlerts,
+    userBalances,
+    userCashBalances,
+    companyBalances,
+    companyCashBalances,
+    incomeData,
+    nationalBalance,
+    onDistribute,
+    onCollect,
+    onReset,
+    onFetchBalances,
+    distributionCount,
+    setUserCashBalances,
+    setCompanyCashBalances,
+    transactions,
+    setTransactions
+  } = props;
+
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
+
   useEffect(() => {
     const audio = new Audio("/sound/main.mp3");
     audio.volume = 0.3;
     audio.loop = true;
     audio.play();
-
     return () => {
       audio.pause();
       audio.currentTime = 0;
@@ -355,28 +368,34 @@ const aiAnalysis = async () => {
           </div>
         </div>
 
-        <div className="user-list-grid">
-          {userBalances.map((bal, idx) => (
-            <UserBox
-              key={idx}
-              idx={idx}
-              userBalance={bal}
-              userCash={userCashBalances[idx]}
-              incomeAmount={incomeData[idx] || 0}
-              incomeShown={incomeData[idx] > 0}
-            />
-          ))}
-        </div>
+   
+      <div className="user-list-grid">
+        {userBalances.map((bal, idx) => (
+          <UserBox
+            key={idx}
+            idx={idx}
+            userBalance={bal}
+            userCash={userCashBalances[idx]}
+            incomeAmount={incomeData[idx] || 0}
+            incomeShown={incomeData[idx] > 0}
+            address={userAddresses[idx]}
+            onSelect={setRecipient}
+          />
+        ))}
+      </div>
 
-        <div className="company-list-grid">
-          {companyBalances.map((bal, idx) => (
-            <div key={idx} className="company-box">
-              <strong>Company{idx + 1}</strong><br />
-              🪙 MetaPay: {bal}<br />
-              💵 Cash: {companyCashBalances[idx]}
-            </div>
-          ))}
-        </div>
+      <div className="company-list-grid">
+        {companyBalances.map((bal, idx) => (
+          <CompanyBox
+            key={idx}
+            idx={idx}
+            balance={bal}
+            cash={companyCashBalances[idx]}
+            address={companyAddresses[idx]}
+            onSelect={setRecipient}
+          />
+        ))}
+      </div>
       </div>
     </div>
 
