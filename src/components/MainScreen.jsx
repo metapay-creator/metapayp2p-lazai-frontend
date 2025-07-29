@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./MainScreen.css";
 
-function MainScreen() {
-  useEffect(() => {
-    console.log("✅ API URL:", import.meta.env.VITE_API_URL);
-  }, []);
-
 function UserBox({ idx, userBalance, userCash, incomeAmount, incomeShown, address, onSelect }) {
   const [displayedCash, setDisplayedCash] = useState(userCash);
   const [showIncome, setShowIncome] = useState(false);
@@ -24,9 +19,8 @@ function UserBox({ idx, userBalance, userCash, incomeAmount, incomeShown, addres
     <div className="user-box" onClick={() => onSelect(address)} style={{ cursor: "pointer" }}>
       <strong>User{idx + 1}</strong><br />
       {showIncome && <div className="income-text">+${incomeAmount.toLocaleString()} 💵</div>}
-     <p className="cash-line">💵 Cash: ${displayedCash.toLocaleString()}</p>
-     <p className="metapay-line">🪙 MetaPay: {userBalance}</p>
-
+      <p className="cash-line">💵 Cash: ${displayedCash.toLocaleString()}</p>
+      <p className="metapay-line">🪙 MetaPay: {userBalance}</p>
     </div>
   );
 }
@@ -42,6 +36,10 @@ function CompanyBox({ idx, balance, cash, address, onSelect }) {
 }
 
 function MainScreen(props) {
+  useEffect(() => {
+    console.log("✅ API URL:", import.meta.env.VITE_API_URL);
+  }, []);
+
   const {
     connectedWallet,
     contract,
@@ -61,7 +59,7 @@ function MainScreen(props) {
     setUserCashBalances,
     setCompanyCashBalances,
     transactions,
-    setTransactions
+    setTransactions,
   } = props;
 
   const [recipient, setRecipient] = useState("");
@@ -138,10 +136,9 @@ function MainScreen(props) {
     }
   };
 
-const aiAnalysis = async () => {
-
+ const aiAnalysis = async () => {
   try {
-  const response = await fetch(import.meta.env.VITE_API_URL + "/api/analyze", {
+    const response = await fetch(import.meta.env.VITE_API_URL + "/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -161,29 +158,39 @@ const aiAnalysis = async () => {
       }),
     });
 
-    const data = await response.json();
-
-    if (data.alerts && Array.isArray(data.alerts)) {
-      data.alerts.forEach((alert) => {
-        addAlert(alert.type || "info", alert.message);
-      });
+    const contentType = response.headers.get("content-type");
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`❌ Server error: ${response.status}\n${errorText}`);
     }
 
-    if (data.aiResult) {
-      addAlert("success", "🧠 AI Analysis Result:");
-      data.aiResult.split("\n").forEach((line) => {
-        if (line.trim() !== "") {
-          addAlert("info", line.trim());
-        }
-      });
+    if (contentType && contentType.includes("application/json")) {
+      const data = await response.json();
+
+      if (data.alerts && Array.isArray(data.alerts)) {
+        data.alerts.forEach((alert) => {
+          addAlert(alert.type || "info", alert.message);
+        });
+      }
+
+      if (data.aiResult) {
+        addAlert("success", "🧠 AI Analysis Result:");
+        data.aiResult.split("\n").forEach((line) => {
+          if (line.trim() !== "") {
+            addAlert("info", line.trim());
+          }
+        });
+      }
+    } else {
+      const text = await response.text();
+      throw new Error("❌ Invalid JSON response:\n" + text);
     }
 
   } catch (err) {
     console.error("AI analysis error:", err);
-    addAlert("error", "❌ AI Analysis Failed");
+    addAlert("error", "❌ AI Analysis Failed: " + err.message);
   }
 };
-
 
 
   const sendP2P = async () => {
@@ -279,21 +286,20 @@ const aiAnalysis = async () => {
     }
 
     const recipientUserIdx = userAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
+    const recipientCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
+
     if (recipientUserIdx !== -1) {
       setUserCashBalances((prev) => {
         const newCash = [...prev];
         newCash[recipientUserIdx] += Number(amount);
         return newCash;
       });
-    } else {
-      const recipientCompanyIdx = companyAddresses.findIndex(a => a.toLowerCase() === recipient.toLowerCase());
-      if (recipientCompanyIdx !== -1) {
-        setCompanyCashBalances((prev) => {
-          const newCash = [...prev];
-          newCash[recipientCompanyIdx] += Number(amount);
-          return newCash;
-        });
-      }
+    } else if (recipientCompanyIdx !== -1) {
+      setCompanyCashBalances((prev) => {
+        const newCash = [...prev];
+        newCash[recipientCompanyIdx] += Number(amount);
+        return newCash;
+      });
     }
 
     setTransactions(prev => [
@@ -318,107 +324,104 @@ const aiAnalysis = async () => {
   }, [contract]);
 
   const handleCollectWithCheck = async () => {
-  await onCollect();
-  await onFetchBalances();
+    await onCollect();
+    await onFetchBalances();
 
-  const totalUserBalance = users.reduce((sum, user) => sum + user.balance, 0);
-  const expectedTotal = Math.floor(totalUserBalance * 0.1);
-  const actualTotal = nationalBalance;
+    const totalUserBalance = userBalances.reduce((sum, balance) => sum + balance, 0);
+    const expectedTotal = Math.floor(totalUserBalance * 0.1);
+    const actualTotal = nationalBalance;
 
-  if (actualTotal < expectedTotal) {
-    const diff = expectedTotal - actualTotal;
-    addAlert("warning", `⚖️ Total collected amount should be ${expectedTotal}. Please send ${diff} MetaPay manually from the admin wallet.`);
-  }
-};
+    if (actualTotal < expectedTotal) {
+      const diff = expectedTotal - actualTotal;
+      addAlert("warning", `⚖️ Total collected amount should be ${expectedTotal}. Please send ${diff} MetaPay manually from the admin wallet.`);
+    }
+  };
 
+  return (
+    <div className="page-wrapper">
+      <div className="alerts-box" style={{ maxHeight: '600px', overflowY: 'auto' }}>
+        <h4>AI Analysis Alerts</h4>
+        <ul>
+          {alerts.map((a, idx) => (
+            <li key={idx} className={a.type}>{a.message}</li>
+          ))}
+        </ul>
+      </div>
 
-   return (
-  <div className="page-wrapper">
-    <div className="alerts-box" style={{ maxHeight: '600px', overflowY: 'auto' }}>
-      <h4>AI Analysis Alerts</h4>
-      <ul>
-        {alerts.map((a, idx) => (
-          <li key={idx} className={a.type}>{a.message}</li>
-        ))}
-      </ul>
-    </div>
+      <div className="main-container">
+        <div className="content-wrapper">
+          <h2>MetaPay Basic Income Simulator</h2>
+          <p><strong>National Wallet Balance:</strong> {nationalBalance}</p>
+          <p><strong>Distribution Count:</strong> {distributionCount} times</p>
 
-    <div className="main-container">
-      <div className="content-wrapper">
-        <h2>MetaPay Basic Income Simulator</h2>
-        <p><strong>National Wallet Balance:</strong> {nationalBalance}</p>
-        <p><strong>Distribution Count:</strong> {distributionCount} times</p>
-
-        <div className="button-group">
-          <button onClick={handleDistributeWithCash}>Distribute</button>
-          <button onClick={handleCollectWithCheck}>Collect</button>
-          <button onClick={onReset}>Reset</button>
-          <button onClick={onFetchBalances}>Check Balances</button>
-          <button onClick={aiAnalysis}>AI Analysis</button>
-        </div>
-
-        <div className="transaction-summary">
-          <h3>Current Transaction Summary</h3>
-          <p>💼 Total Company Inflow: {companyBalances.reduce((acc, bal) => acc + bal, 0)}</p>
-          <p>👤 Total User Distributed: {userBalances.reduce((acc, bal) => acc + bal, 0)}</p>
-        </div>
-
-        <div className="p2p-transfer">
-          <h3>P2P Transfer</h3>
-          <input type="text" value={recipient} placeholder="Recipient Address" onChange={(e) => setRecipient(e.target.value)} />
-          <input type="number" value={amount} placeholder="Amount" onChange={(e) => setAmount(e.target.value)} />
           <div className="button-group">
-            <button onClick={sendP2P}>Send (MetaPay + Cash)</button>
-            <button onClick={sendCashOnly}>Send Cash Only</button>
+            <button onClick={handleDistributeWithCash}>Distribute</button>
+            <button onClick={handleCollectWithCheck}>Collect</button>
+            <button onClick={onReset}>Reset</button>
+            <button onClick={onFetchBalances}>Check Balances</button>
+            <button onClick={aiAnalysis}>AI Analysis</button>
+          </div>
+
+          <div className="transaction-summary">
+            <h3>Current Transaction Summary</h3>
+            <p>💼 Total Company Inflow: {companyBalances.reduce((acc, bal) => acc + bal, 0)}</p>
+            <p>👤 Total User Distributed: {userBalances.reduce((acc, bal) => acc + bal, 0)}</p>
+          </div>
+
+          <div className="p2p-transfer">
+            <h3>P2P Transfer</h3>
+            <input type="text" value={recipient} placeholder="Recipient Address" onChange={(e) => setRecipient(e.target.value)} />
+            <input type="number" value={amount} placeholder="Amount" onChange={(e) => setAmount(e.target.value)} />
+            <div className="button-group">
+              <button onClick={sendP2P}>Send (MetaPay + Cash)</button>
+              <button onClick={sendCashOnly}>Send Cash Only</button>
+            </div>
+          </div>
+
+          <div className="user-list-grid">
+            {userBalances.map((bal, idx) => (
+              <UserBox
+                key={idx}
+                idx={idx}
+                userBalance={bal}
+                userCash={userCashBalances[idx]}
+                incomeAmount={incomeData[idx] || 0}
+                incomeShown={incomeData[idx] > 0}
+                address={userAddresses[idx]}
+                onSelect={setRecipient}
+              />
+            ))}
+          </div>
+
+          <div className="company-list-grid">
+            {companyBalances.map((bal, idx) => (
+              <CompanyBox
+                key={idx}
+                idx={idx}
+                balance={bal}
+                cash={companyCashBalances[idx]}
+                address={companyAddresses[idx]}
+                onSelect={setRecipient}
+              />
+            ))}
           </div>
         </div>
-
-   
-      <div className="user-list-grid">
-        {userBalances.map((bal, idx) => (
-          <UserBox
-            key={idx}
-            idx={idx}
-            userBalance={bal}
-            userCash={userCashBalances[idx]}
-            incomeAmount={incomeData[idx] || 0}
-            incomeShown={incomeData[idx] > 0}
-            address={userAddresses[idx]}
-            onSelect={setRecipient}
-          />
-        ))}
       </div>
 
-      <div className="company-list-grid">
-        {companyBalances.map((bal, idx) => (
-          <CompanyBox
-            key={idx}
-            idx={idx}
-            balance={bal}
-            cash={companyCashBalances[idx]}
-            address={companyAddresses[idx]}
-            onSelect={setRecipient}
-          />
-        ))}
-      </div>
+      <div className="transaction-box" style={{ position: 'absolute', top: '20px', right: '40px', backgroundColor: 'white', color: 'black', padding: '12px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)', maxHeight: '600px', overflowY: 'auto', width: '300px' }}>
+        <h4>📎 Transaction History</h4>
+        <ul>
+          {transactions.slice(-30).map((tx, idx) => (
+            <li key={idx} style={{ marginBottom: '12px' }}>
+              {getShortName(tx.from)} → {getShortName(tx.to)}:<br />
+              💰 {tx.amount} MetaPay / 💵 {tx.cashAmount} Cash<br />
+              🕒 {new Date(tx.timestamp).toLocaleString()}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
-
-    <div className="transaction-box" style={{ position: 'absolute', top: '20px', right: '40px', backgroundColor: 'white', color: 'black', padding: '12px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)', maxHeight: '600px', overflowY: 'auto', width: '300px' }}>
-      <h4>📎 Transaction History</h4>
-      <ul>
-        {transactions.slice(-30).map((tx, idx) => (
-          <li key={idx} style={{ marginBottom: '12px' }}>
-            {getShortName(tx.from)} → {getShortName(tx.to)}:<br />
-            💰 {tx.amount} MetaPay / 💵 {tx.cashAmount} Cash<br />
-            🕒 {new Date(tx.timestamp).toLocaleString()}
-          </li>
-        ))}
-      </ul>
-    </div>
-  </div>
-);
+  );
 }
-
 
 export default MainScreen;
