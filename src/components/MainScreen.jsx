@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "./MainScreen.css";
 
+function MainScreen() {
+  useEffect(() => {
+    console.log("✅ API URL:", import.meta.env.VITE_API_URL);
+  }, []);
+
 function UserBox({ idx, userBalance, userCash, incomeAmount, incomeShown, address, onSelect }) {
   const [displayedCash, setDisplayedCash] = useState(userCash);
   const [showIncome, setShowIncome] = useState(false);
