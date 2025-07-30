@@ -241,15 +241,26 @@ All **MetaPay (🪙)** transactions — including distributions and recollection
 ---
 ---
 
-## ⚖️ License Notice
+## ⚖️ Enhanced License Notice
 
-© 2025 Gyuha Yoon — MetaPay Project for HyperHack  
+© 2025 Gyuha Yoon — MetaPay Project for HyperHack
 
-This project is licensed under the MIT License with Commercial Use Restriction.  
+This project, including but not limited to its code, architecture, algorithms, 
+economic model, and simulation logic, is protected under copyright law 
+and is licensed under a modified MIT License with strict Commercial and Policy Use Restrictions.
 
-❗ Commercial use is strictly prohibited without permission.  
+❗ **Commercial or policy-level use is strictly prohibited without explicit written permission.**
 
-For licensing inquiries, contact: anioia33@gmail.com  
+Prohibited uses include, but are not limited to:
+- Implementation of the core circulation model (10 distributions + 1 recollection cycle) in any commercial product or public policy program.
+- Replication of the forced mixed-payment system (e.g., 50% MetaPay + 50% cash) in any real-world or simulated economy.
+- Any government, NGO, or corporate adoption of the system for basic income or related economic programs without a licensing agreement.
+- Modification, translation, or adaptation of the underlying model for the purpose of commercial or institutional deployment.
+
+For licensing inquiries, contact: anioia33@gmail.com
+
+Violation of this license may result in legal action, including claims for damages and injunctions.
+
 
 ---
 
