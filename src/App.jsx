@@ -11,14 +11,19 @@ function App() {
   const [connectedWallet, setConnectedWallet] = useState("");
   const [alerts, setAlerts] = useState([]);
   const [showMainScreen, setShowMainScreen] = useState(false);
+
   const [userBalances, setUserBalances] = useState(Array(10).fill(0));
   const [userCashBalances, setUserCashBalances] = useState([100000, 50000, 50000, 10000, 5000, 20000, 8000, 9000, 500, 300]);
   const [companyBalances, setCompanyBalances] = useState(Array(5).fill(0));
   const [companyCashBalances, setCompanyCashBalances] = useState([500000, 300000, 100000, 50000, 10000]);
   const [incomeData, setIncomeData] = useState(Array(10).fill({ amount: 0, shown: false }));
+
   const [nationalBalance, setNationalBalance] = useState(0);
   const [distributionCount, setDistributionCount] = useState(0);
+
   const [transactions, setTransactions] = useState([]);
+
+  // ✅ 국가 및 사용자/회사 주소 정의
   const nationalWalletAddress = "0xD7ACd2a9FD159E69Bb102A1ca21C9a3e3A5F771B";
   const userAddresses = [
     "0xcAEc83c59b3FbfE65cC73828e9c89b9c07902105",
@@ -47,6 +52,7 @@ function App() {
         const signer = await ethProvider.getSigner();
         const address = await signer.getAddress();
         const contractInstance = new ethers.Contract(contractAddress, abi, signer);
+
         setProvider(ethProvider);
         setSigner(signer);
         setContract(contractInstance);
@@ -74,11 +80,14 @@ function App() {
     try {
       const tx = await contract.distribute();
       await tx.wait();
+
       setUserCashBalances(prev => prev.map(cash => cash + 300));
       setCompanyCashBalances(prev => prev.map(cash => cash + 300));
       await fetchBalances();
+
       setDistributionCount(prev => prev + 1);
       setAlerts(prev => [...prev, { type: "success", message: "✅ Distribution success" }]);
+
       const timestamp = Date.now();
       const newTxs = [
         ...userAddresses.map(addr => ({
@@ -97,6 +106,7 @@ function App() {
         }))
       ];
       setTransactions(prev => [...prev, ...newTxs]);
+
       return true;
     } catch (err) {
       console.error("Distribute Error:", err);
